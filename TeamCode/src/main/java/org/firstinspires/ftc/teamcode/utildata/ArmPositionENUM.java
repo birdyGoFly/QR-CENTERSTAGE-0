@@ -9,6 +9,7 @@ public class ArmPositionENUM {
         placementPosition1,
         drivingPosition,
         hangPosition,
+        hangingPosition,
 
     }
 

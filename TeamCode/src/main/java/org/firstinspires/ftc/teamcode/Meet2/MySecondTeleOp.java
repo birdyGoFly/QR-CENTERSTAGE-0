@@ -62,6 +62,7 @@ public class MySecondTeleOp extends OpMode {
     boolean leftGrabberButtonCheck = false;
     boolean rightGrabberButtonCheck = false;
     boolean intakeModeButtonCheck = false;
+    boolean hangModeButtonCheck = false;
 
     int armRotationOffset = 0;
     int armExtensionOffset = 0;
@@ -71,7 +72,7 @@ public class MySecondTeleOp extends OpMode {
     int placementPosition1 = 2;
     int drivingPosition = 3;
     int hangPosition = 4;
-
+    int hangingPosition = 5;
 
 
     //--------------------------
@@ -86,8 +87,8 @@ public class MySecondTeleOp extends OpMode {
     //POSITION SETUP:
 
     //Drone
-    double droneArmedPosition = 0;
-    double droneLaunchPosition = 1;
+    double droneArmedPosition = 0.2;
+    double droneLaunchPosition = 0.45;
     //Wrist
     double wristIntakePosition = 0.55;
     double wristPlacementPosition = 0.05;
@@ -173,87 +174,83 @@ public class MySecondTeleOp extends OpMode {
         //-----------------------------------------------------------------
 
 
-
-
         //Toggle on/off logic for left grabber
-        if(gamepad1.a && !leftGrabberButtonCheck)
-        {
-            if(!isLeftGrabberCurrentlyOpen)
-            {
+        if (gamepad1.a && !leftGrabberButtonCheck) {
+            if (!isLeftGrabberCurrentlyOpen) {
                 isLeftGrabberCurrentlyOpen = true;
-            }
-            else
-            {
+            } else {
                 isLeftGrabberCurrentlyOpen = false;
             }
             leftGrabberButtonCheck = true;
-        }
-        else if(!gamepad1.a)
-        {
+        } else if (!gamepad1.a) {
             leftGrabberButtonCheck = false;
         }
 
 
         //Toggle on/off logic for right grabber
-        if(gamepad1.x && !rightGrabberButtonCheck)
-        {
-            if(!isRightGrabberCurrentlyOpen)
-            {
+        if (gamepad1.x && !rightGrabberButtonCheck) {
+            if (!isRightGrabberCurrentlyOpen) {
                 isRightGrabberCurrentlyOpen = true;
-            }
-            else
-            {
+            } else {
                 isRightGrabberCurrentlyOpen = false;
             }
             rightGrabberButtonCheck = true;
-        }
-        else if(!gamepad1.x)
-        {
+        } else if (!gamepad1.x) {
             rightGrabberButtonCheck = false;
         }
 
         //Switch between intake states // ArmPosition 0 means the arm is lowered and ready to pick up a pixel, 1 is the position to place a pixel, and 2 is for the hanging
-        if(gamepad1.b && !intakeModeButtonCheck)
-        {
-            if(ArmPosition == intakePosition)
-            {
+        if (gamepad1.b && !intakeModeButtonCheck) {
+            if (ArmPosition == intakePosition) {
                 ArmPosition = carryingPosition;
-            }
-            else if(ArmPosition == carryingPosition)
-            {
+            } else if (ArmPosition == carryingPosition) {
                 ArmPosition = placementPosition1;
-            }
-            else if(ArmPosition == placementPosition1)
-            {
+            } else if (ArmPosition == placementPosition1) {
                 ArmPosition = drivingPosition;
-            }
-            else if(ArmPosition == drivingPosition)
-            {
+            } else if (ArmPosition == drivingPosition) {
                 ArmPosition = intakePosition;
             }
-                intakeModeButtonCheck = true;
-            }
-            else if(!gamepad1.b)
-            {
-                intakeModeButtonCheck = false;
-            }
+            intakeModeButtonCheck = true;
+        } else if (!gamepad1.b) {
+            intakeModeButtonCheck = false;
+        }
 
-            if(ArmPosition == intakePosition)
-            {
-                armRotationPower = 0.75;
+        if (ArmPosition == intakePosition) {
+            armRotationPower = 0.75;
+        } else if (ArmPosition == drivingPosition) {
+            armRotationPower = 0.3;
+        } else if (ArmPosition == 2) {
+            armRotationPower = 0.3;
+        } else if (ArmPosition == 3) {
+            armRotationPower = 0.15;
+        }
+
+        if (gamepad1.left_trigger >= 0.25)
+        {
+            drone.setPosition(droneLaunchPosition);
+        }
+        else
+        {
+            drone.setPosition(droneArmedPosition);
+        }
+
+
+        if (gamepad1.left_bumper && !hangModeButtonCheck) {
+            if (ArmPosition == 0 || ArmPosition == 1 || ArmPosition == 2 || ArmPosition == 3 || ArmPosition == 4) {
+                ArmPosition = hangPosition;
+            } else if (ArmPosition == hangPosition) {
+                ArmPosition = hangingPosition;
             }
-            else if (ArmPosition == drivingPosition)
-            {
-                armRotationPower = 0.3;
-            }
-            else if (ArmPosition == 2)
-            {
-                armRotationPower = 0.3;
-            }
-            else if (ArmPosition == 3)
-            {
-                armRotationPower = 0.25;
-            }
+            rightGrabberButtonCheck = true;
+        } else if (!gamepad1.left_bumper) {
+            rightGrabberButtonCheck = false;
+        }
+
+        if(gamepad1.right_bumper)
+        {
+            ArmPosition = hangingPosition;
+        }
+
 /*
         if(gamepad1.right_bumper && ArmPosition == 1)
         {
@@ -273,22 +270,21 @@ public class MySecondTeleOp extends OpMode {
 */
         rotateArm(ArmPosition);
 
-        if (ArmPosition == carryingPosition)
-        {
+        if (ArmPosition == carryingPosition) {
             armExtensionTarget = 0;
-        }
-        else if(ArmPosition == intakePosition)
-        {
+        } else if (ArmPosition == intakePosition) {
             armExtensionTarget = 0;
-        }
-        else if (ArmPosition == placementPosition1)
-        {
+        } else if (ArmPosition == placementPosition1) {
             //extendToTargetPosition(armExtensionOffset);
             armExtensionTarget = 3500;
-        }
-        else if(ArmPosition == drivingPosition)
-        {
+        } else if (ArmPosition == drivingPosition) {
             armExtensionTarget = 0;
+        } else if (ArmPosition == hangPosition) {
+            armExtensionTarget = 9000;
+            armRotationTarget = -400;
+        } else if (ArmPosition == hangingPosition) {
+            armExtensionTarget = 10; // 10 to make sure it doesn't go to far and start skipping while the robot is hanging
+            armRotationTarget = -400;
         }
         //-----------------------------------------------------------------
 
@@ -307,64 +303,47 @@ public class MySecondTeleOp extends OpMode {
     }
 
 
-
-
-
 //╔═╗┬ ┬┌┐┌┌─┐┌┬┐┬┌─┐┌┐┌┌─┐
 //╠╣ │ │││││   │ ││ ││││└─┐
 //╚  └─┘┘└┘└─┘ ┴ ┴└─┘┘└┘└─┘
-    private void launchDrone()
-    {
+    private void launchDrone() {
         drone.setPosition(0.5);
     }
 
-    private void leftGrabber(boolean leftGrabberCurrentlyOpen)
-    {
-        if (leftGrabberCurrentlyOpen)
-        {
+    private void leftGrabber(boolean leftGrabberCurrentlyOpen) {
+        if (leftGrabberCurrentlyOpen) {
             grab1.setPosition(grabberClosedPosition);
-        }
-        else if (!leftGrabberCurrentlyOpen)
-        {
+        } else if (!leftGrabberCurrentlyOpen) {
             grab1.setPosition(grabberOpenPosition);
         }
     }
 
-    private void rightGrabber(boolean rightGrabberCurrentlyOpen)
-    {
-        if (rightGrabberCurrentlyOpen)
-        {
+    private void rightGrabber(boolean rightGrabberCurrentlyOpen) {
+        if (rightGrabberCurrentlyOpen) {
             grab2.setPosition(grabberClosedPosition);
-        }
-        else if (!rightGrabberCurrentlyOpen)
-        {
+        } else if (!rightGrabberCurrentlyOpen) {
             grab2.setPosition(grabberOpenPosition);
         }
     }
 
-    private int rotateArm(int ArmPosition)
-    {
-        if (ArmPosition == intakePosition)
-        {
+    private int rotateArm(int ArmPosition) {
+        if (ArmPosition == intakePosition) {
             wrist.setPosition(wristIntakePosition);
-            return armRotationTarget = 15;
-        }
-        else if (ArmPosition == carryingPosition || ArmPosition == drivingPosition)
-        {
+            return armRotationTarget = -5;
+        } else if (ArmPosition == carryingPosition || ArmPosition == drivingPosition) {
             wrist.setPosition(wristIntakePosition);
             return armRotationTarget = -100;
-        }
-        else if (ArmPosition == placementPosition1)
-        {
+        } else if (ArmPosition == placementPosition1) {
             wrist.setPosition(wristPlacementPosition);
             return armRotationTarget = -660;
-        }
-        else //This would be to enter the "hangingPosition."
+        } else if (ArmPosition == hangPosition || ArmPosition == hangingPosition) //This would be to enter the "hangingPosition."
         {
-            hangTime();
-            return(armRotationTarget = -300);
+            return (armRotationTarget = -300);
         }
+        return ArmPosition;
     }
+
+}
 /*
     private double extendToTargetPosition(int armExtensionTarget)
     {
@@ -386,7 +365,7 @@ public class MySecondTeleOp extends OpMode {
 
  */
 
-
+/*
     private void hangTime() //Macro to hang from the rigging
     {
         ArmPosition = 4;
@@ -394,3 +373,5 @@ public class MySecondTeleOp extends OpMode {
         wrist.setPosition(wristPlacementPosition);
     }
 }
+
+ */
