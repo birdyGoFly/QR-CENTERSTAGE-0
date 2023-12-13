@@ -65,8 +65,8 @@ public class EasyOpenCVAutonomous extends OpMode {
             leftCrop = YCbCr.submat(leftRect);
             rightCrop = YCbCr.submat(rightRect);
 
-            Core.extractChannel(leftCrop, leftCrop, 2);
-            Core.extractChannel(rightCrop,rightCrop, 2);
+            Core.extractChannel(leftCrop, leftCrop, 1);
+            Core.extractChannel(rightCrop,rightCrop, 1);
 
             Scalar leftavg = Core.mean(leftCrop);
             Scalar rightavg = Core.mean(rightCrop);
@@ -74,10 +74,14 @@ public class EasyOpenCVAutonomous extends OpMode {
             leftavgfin = leftavg.val[0];
             rightavgfin = rightavg.val[0];
 
+            telemetry.addData("ahhhleft",leftavg.val[0]);
+            telemetry.addData("ahhhright",rightavg.val[0]);
             if(leftavgfin < rightavgfin){
                 telemetry.addLine("left");
-            }else{
+            }else if (leftavgfin >= rightavgfin){
                 telemetry.addLine("right");
+            }else{
+                telemetry.addLine("null");
             }
             return (outPut);
         }
