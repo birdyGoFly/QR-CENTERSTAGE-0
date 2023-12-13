@@ -1,3 +1,4 @@
+/*
 package org.firstinspires.ftc.teamcode.Meet3;
 
 import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.drivingPosition;
@@ -12,7 +13,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs;
 import org.firstinspires.ftc.teamcode.utildata.ArmPositionENUM;
 
-@TeleOp(name="Meet 3 TeleOp", group="Iterative OpMode")
+
+@Disabled
 public class Meet3Code {
 
     //╔╦╗┌─┐┌┬┐┌─┐┬─┐┌─┐
@@ -88,3 +90,8 @@ public class Meet3Code {
 
     }
 }
+
+
+
+
+ */

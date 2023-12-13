@@ -16,8 +16,8 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 @Autonomous
 public class EasyOpenCVAutonomous extends OpMode {
-    int xCameraLength = 1920;
-    int yCameraLength = 1080;
+    int xCameraLength = 1280;
+    int yCameraLength = 720;
     OpenCvWebcam webcam1 = null;
     @Override
     public void init(){
@@ -74,7 +74,7 @@ public class EasyOpenCVAutonomous extends OpMode {
             leftavgfin = leftavg.val[0];
             rightavgfin = rightavg.val[0];
 
-            if(leftavgfin > rightavgfin){
+            if(leftavgfin < rightavgfin){
                 telemetry.addLine("left");
             }else{
                 telemetry.addLine("right");
