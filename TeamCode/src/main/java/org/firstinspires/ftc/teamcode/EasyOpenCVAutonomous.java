@@ -46,42 +46,51 @@ public class EasyOpenCVAutonomous extends OpMode {
         Mat YCbCr = new Mat();
         Mat leftCrop;
         Mat rightCrop;
+        Mat midCrop;
         double leftavgfin;
         double rightavgfin;
+        double midavgfin;
         Mat outPut = new Mat();
         Scalar rectColor = new Scalar(255.0, 0.0, 0.0);
 
         public Mat processFrame(Mat input){
             Imgproc.cvtColor(input,YCbCr,Imgproc.COLOR_RGB2YCrCb);
-            telemetry.addLine("pipeline running");
+            //telemetry.addLine("pipeline running");
 
-            Rect leftRect = new Rect(1,1,xCameraLength/2 - 1, yCameraLength-1);
-            Rect rightRect = new Rect(xCameraLength/2,1, xCameraLength/2 - 1, yCameraLength-1);
+            Rect leftRect = new Rect(1,1,xCameraLength/3 - 1, yCameraLength-1);
+            Rect midRect = new Rect(xCameraLength/3,1,xCameraLength/3 - 1, yCameraLength-1);
+            Rect rightRect = new Rect(xCameraLength*2/3,1, xCameraLength/3 - 1, yCameraLength-1);
 
             input.copyTo(outPut);
             Imgproc.rectangle(outPut,leftRect,rectColor,2);
+            Imgproc.rectangle(outPut,midRect,rectColor,2);
             Imgproc.rectangle(outPut,rightRect,rectColor,2);
 
             leftCrop = YCbCr.submat(leftRect);
+            midCrop = YCbCr.submat(midRect);
             rightCrop = YCbCr.submat(rightRect);
 
-            Core.extractChannel(leftCrop, leftCrop, 1);
-            Core.extractChannel(rightCrop,rightCrop, 1);
+            Core.extractChannel(leftCrop, leftCrop, 2);
+            Core.extractChannel(midCrop, midCrop, 2);
+            Core.extractChannel(rightCrop,rightCrop, 2);
 
             Scalar leftavg = Core.mean(leftCrop);
+            Scalar midavg = Core.mean(midCrop);
             Scalar rightavg = Core.mean(rightCrop);
 
             leftavgfin = leftavg.val[0];
+            midavgfin = midavg.val[0];
             rightavgfin = rightavg.val[0];
 
-            telemetry.addData("ahhhleft",leftavg.val[0]);
-            telemetry.addData("ahhhright",rightavg.val[0]);
-            if(leftavgfin < rightavgfin){
+            telemetry.addData("right color", rightavgfin);
+            telemetry.addData("mid color", midavgfin);
+            telemetry.addData("left color", leftavgfin);
+            if(leftavgfin < rightavgfin && leftavgfin < midavgfin){
                 telemetry.addLine("left");
-            }else if (leftavgfin >= rightavgfin){
+            }else if (rightavgfin < leftavgfin && rightavgfin < midavgfin){
                 telemetry.addLine("right");
-            }else{
-                telemetry.addLine("null");
+            }else if(midavgfin <= leftavgfin && midavgfin <= rightavgfin){
+                telemetry.addLine("middle");
             }
             return (outPut);
         }
