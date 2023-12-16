@@ -1,4 +1,4 @@
-/*
+
 package org.firstinspires.ftc.teamcode.Meet3;
 
 import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.drivingPosition;
@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs;
 import org.firstinspires.ftc.teamcode.utildata.ArmPositionENUM;
 
 
-@Disabled
+
 public class Meet3Code {
 
     //╔╦╗┌─┐┌┬┐┌─┐┬─┐┌─┐
@@ -50,13 +50,10 @@ public class Meet3Code {
         //telemetry.addData("Current Status", "Robot Has Been Initialized");
 
     }
-
-    @Override
     public void init_loop() {
         //Anything here would run after the PLAY button was pressed
     }
 
-    @Override
     public void loop()
     {
 
@@ -70,6 +67,9 @@ public class Meet3Code {
                 break;
 
             case intakePosition:
+                break;
+            case boardPosition:
+                
                 break;
         }
         if(activeRobotMode == drivingPosition)
@@ -90,8 +90,3 @@ public class Meet3Code {
 
     }
 }
-
-
-
-
- */
