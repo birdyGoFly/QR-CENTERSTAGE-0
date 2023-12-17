@@ -2,10 +2,12 @@
 package org.firstinspires.ftc.teamcode.Meet3;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.boardPosition;
 import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.drivingPosition;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -37,7 +39,7 @@ public class Meet3Code {
 
     private CRServo transferWheel = null;
     private Servo transferRotation = null;
-    private Servo transferArm = null;
+    private CRServo transferArm = null;
     private Servo transferDoor = null;
     private Servo leftFlipoutIntakeServo = null;
     private Servo rightFlipoutIntakeServo = null;
@@ -47,14 +49,25 @@ public class Meet3Code {
     private double transferWheelTurnPower = 1; /* maybe change this*/
     private boolean turnTransferWheel = false;
 
+    //get our analog input from the hardwareMap
+    AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "transferArm");
+
+    // get the voltage of our analog line
+// divide by 3.3 (the max voltage) to get a value between 0 and 1
+// multiply by 360 to convert it to 0 to 360 degrees
+    double position = analogInput.getVoltage() / 3.3 * 360;
+
+    private double transferArmBoardTarget = 200; /*mesure value*/ //this is the variable that measures how much the arm must turn to reach the board
+    private double transferArmRestTarget = 0; /*mesure value*/ //this is the variable that measures how much the arm must turn to reach resting position
     private double doorOpenPosition = 1;/*mesure the value*/
     private double doorClosedPosition = 0;/*change this*//*assuming that this is the starting position*/
-    private double transferArmDepositPosition = 1;/*mesure the value*/
-    private double transferArmIntakePosition = 0;/*change this*//*assuming that this is the starting position*/
+    private double transferArmPower = 1;
     private double transferRotationDepositPosition = 1;/*mesure the value*/
     private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the starting position*/
     private double storedIntakePosition = 0; /*change this*//*this is when the flipout intakes are up*/
     private double intakePosition = 1; /*change this*//*this is when the flipout intakes are intaking lol*/
+
+
 
     //MOTOR POSITION VARIABLES
     private int extentionLength = 25 /*change this value probably*/;
@@ -185,29 +198,33 @@ public class Meet3Code {
         //Runs the sliders, arm, and transferRotation to the right position
         if(armToBoardPosition){
             leftSliderExtension.setTargetPosition(extentionLength);
-            leftSliderExtension.setPower(extentionPower);
+            leftSliderExtension.setPower(extentionPower); //maybe swap the signs
             leftSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             rightSliderExtension.setTargetPosition(extentionLength);
-            rightSliderExtension.setPower(extentionPower);
+            rightSliderExtension.setPower(-extentionPower); //maybe swap the signs
             rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            transferArm.setPosition(transferArmDepositPosition);
+            if(position < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
+                transferArm.setPower(transferArmPower); //maybe swap the sign
+            }
             transferRotation.setPosition(transferRotationDepositPosition);
         }else{
             leftSliderExtension.setTargetPosition(sliderRest); // should be resting position
-            leftSliderExtension.setPower(extentionPower);
+            leftSliderExtension.setPower(-extentionPower); //maybe swap the signs
             leftSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             rightSliderExtension.setTargetPosition(sliderRest); // should be resting position
-            rightSliderExtension.setPower(extentionPower);
+            rightSliderExtension.setPower(extentionPower); //maybe swap the signs
             rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            transferArm.setPosition(transferArmIntakePosition); //should be resting position
+            if(position > transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
+                transferArm.setPower(-transferArmPower); //maybe swap the sign
+            }
             transferRotation.setPosition(transferRotationIntakePosition); //should be resting position
         }
 
