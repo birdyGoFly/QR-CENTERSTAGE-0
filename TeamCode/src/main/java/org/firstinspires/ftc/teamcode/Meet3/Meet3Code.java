@@ -44,21 +44,24 @@ public class Meet3Code {
 
     //SERVO POSITION VARIABLES
     private boolean armToBoardPosition = false;
-    private double turnPower = 1; /* maybe change this*/
+    private double transferWheelTurnPower = 1; /* maybe change this*/
     private boolean turnTransferWheel = false;
 
-    private int doorOpenPosition = 123;/*mesure the value*/
-    private int doorClosedPosition = 123;/*change this*//*assuming that this is the starting position*/
-    private int transferArmDepositPosition = 123123123;/*mesure the value*/
-    private int transferArmIntakePosition = 0;/*change this*//*assuming that this is the starting position*/
-    private int transferRotationDepositPosition = 123123123;/*mesure the value*/
-    private int transferRotationIntakePosition = 0;/*change this*//*assuming that this is the starting position*/
+    private double doorOpenPosition = 1;/*mesure the value*/
+    private double doorClosedPosition = 0;/*change this*//*assuming that this is the starting position*/
+    private double transferArmDepositPosition = 1;/*mesure the value*/
+    private double transferArmIntakePosition = 0;/*change this*//*assuming that this is the starting position*/
+    private double transferRotationDepositPosition = 1;/*mesure the value*/
+    private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the starting position*/
+    private double storedIntakePosition = 0; /*change this*//*this is when the flipout intakes are up*/
+    private double intakePosition = 1; /*change this*//*this is when the flipout intakes are intaking lol*/
 
     //MOTOR POSITION VARIABLES
     private int extentionLength = 25 /*change this value probably*/;
     private double extentionPower = 1;
     private int extentionChange = 1; // how much a bumper trigger increases or decreases the extention length
     private int sliderRest = 0; /* this is the rest. Maybe change*/
+    private int intakeMotorPower = 1; /*maybe change this*/
 
 
     //VARIABLES I USE TO SEE HOW MANY TIMES "A" or "B" HAS BEEN PRESSED XD
@@ -100,7 +103,53 @@ public class Meet3Code {
 
         switch (activeRobotMode) {
             case drivingPosition:
+                //DRIVING CODE COPIED FROM MEET 2 -------------------------------------------------------
+                double y = -gamepad1.right_stick_y;
+                double x = gamepad1.right_stick_x * 1.1; // The multiplier is to counteract imperfect strafing.
+                double rx = gamepad1.left_stick_x;
 
+                // Denominator is the largest motor power (absolute value) or 1
+                // This ensures all the powers maintain the same ratio,
+                // but only if at least one is out of the range [-1, 1]
+                double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                double frontLeftPower = (y + x + rx) / denominator;
+                double backLeftPower = (y - x + rx) / denominator;
+                double frontRightPower = (y - x - rx) / denominator;
+                double backRightPower = (y + x - rx) / denominator;
+
+                frontLeft.setPower(frontLeftPower);
+                backLeft.setPower(backLeftPower);
+                frontRight.setPower(frontRightPower);
+                backRight.setPower(backRightPower);
+                ///////////////////////////////////////////////////////////////////////////////////////////
+                if(gamepad1.x) { //if X is pressed X will spit out pixels
+                    intakeMotor.setPower(-intakeMotorPower); //turn the intakes the opposite way
+                    intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+                }else if(gamepad1.y){ //if Y is pressed Y will spit out pixels as well as pixels already stored in the robot
+                    intakeMotor.setPower(-intakeMotorPower); //turn the intakes the opposite way
+                    intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    transferWheel.setPower(-transferWheelTurnPower); //turns the transfer wheel the other way to spit out pixels
+                }else if(gamepad1.a) { //if A is pressed  A will intake pixels
+                    leftFlipoutIntakeServo.setPosition(intakePosition); //stretch out the intakes
+                    rightFlipoutIntakeServo.setPosition(intakePosition); //stretch out the intakes
+                    intakeMotor.setPower(intakeMotorPower); //turn the intakes
+                    intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    transferWheel.setPower(transferWheelTurnPower); // turns the transfer wheel
+                }else{
+                    leftFlipoutIntakeServo.setPosition(storedIntakePosition); //store the intakes
+                    rightFlipoutIntakeServo.setPosition(storedIntakePosition); //store the intakes
+                    intakeMotor.setPower(0); //stop turning the intakes
+                    transferWheel.setPower(0); // makes sure the transfer wheel isn't turning when nothing is pressed
+                    if (gamepad1.b && !BHasBeenPressed) { //if nothing else was pressed, check if b was pressed to switch modes
+                        BHasBeenPressed = true;
+                        armToBoardPosition = true; //puts the sliders, arm, and transferRotation to the right position
+                        activeRobotMode = boardPosition; //switches mode
+                        numAPress = 0; //resets how many times A has been pressed just in case
+                    } else if(!gamepad1.b) { //makes sure B cannot be held
+                        BHasBeenPressed = false;
+                    }
+                }
                 break;
             case boardPosition:
                 if(gamepad1.a){ //if A is pressed
@@ -110,7 +159,7 @@ public class Meet3Code {
                         transferDoor.setPosition(doorOpenPosition);
                     }else if(numAPress == 1){
                         //second press turns wheel
-                        transferWheel.setPower(turnPower);
+                        transferWheel.setPower(transferWheelTurnPower);
                     }
                 }else if(hasABeenPressed){
                     hasABeenPressed = false;
@@ -122,11 +171,12 @@ public class Meet3Code {
 
                 }else { //if nothing was pressed then checks if B was pressed
                     if (gamepad1.b && !BHasBeenPressed) {
-                        transferWheel.setPower(turnPower); // makes sure the transfer wheel starts turning when switching into driving mode
+                        transferWheel.setPower(0); // makes sure the transfer wheel stops turning when switching into driving mode
                         BHasBeenPressed = true;
                         armToBoardPosition = false; //puts the sliders, arm, and transferRotation to the right position
                         activeRobotMode = drivingPosition; //switches mode
-                    } else { //makes sure B cannot be held
+                        numAPress = 0; //resets how many times A has been pressed
+                    } else if(!gamepad1.b){ //makes sure B cannot be held
                         BHasBeenPressed = false;
                     }
                 }
