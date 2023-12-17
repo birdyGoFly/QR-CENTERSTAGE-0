@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Meet3;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.boardPosition;
 import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.drivingPosition;
 
@@ -19,8 +20,9 @@ import org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs;
 import org.firstinspires.ftc.teamcode.utildata.ArmPositionENUM;
 
 
-
-public class Meet3Code {
+@TeleOp(name="Meet 3 TeleOp", group="Iterative OpMode")
+public class Meet3Code extends OpMode
+{
 
     //╔╦╗┌─┐┌┬┐┌─┐┬─┐┌─┐
     //║║║│ │ │ │ │├┬┘└─┐
@@ -57,15 +59,15 @@ public class Meet3Code {
 // multiply by 360 to convert it to 0 to 360 degrees
     double position = analogInput.getVoltage() / 3.3 * 360;
 
-    private double transferArmBoardTarget = 200; /*mesure value*/ //this is the variable that measures how much the arm must turn to reach the board
-    private double transferArmRestTarget = 0; /*mesure value*/ //this is the variable that measures how much the arm must turn to reach resting position
-    private double doorOpenPosition = 1;/*mesure the value*/
+    private double transferArmBoardTarget = 200; /*measure value*/ //this is the variable that measures how much the arm must turn to reach the board
+    private double transferArmRestTarget = 0; /*measure value*/ //this is the variable that measures how much the arm must turn to reach resting position
+    private double doorOpenPosition = 1;/*measure the value*/
     private double doorClosedPosition = 0;/*change this*//*assuming that this is the starting position*/
     private double transferArmPower = 1;
-    private double transferRotationDepositPosition = 1;/*mesure the value*/
+    private double transferRotationDepositPosition = 1;/*measure the value*/
     private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the starting position*/
-    private double storedIntakePosition = 0; /*change this*//*this is when the flipout intakes are up*/
-    private double intakePosition = 1; /*change this*//*this is when the flipout intakes are intaking lol*/
+    private double storedIntakePosition = 0; /*change this*//*this is when the flipout intakes are retracted*/
+    private double intakePosition = 1; /*change this*//*this is when the flipout intakes are deployed*/
 
 
 
@@ -77,40 +79,60 @@ public class Meet3Code {
     private int intakeMotorPower = 1; /*maybe change this*/
 
 
-    //VARIABLES I USE TO SEE HOW MANY TIMES "A" or "B" HAS BEEN PRESSED XD
+    //Variables to check how many times "A" or "B" has been pressed
     private int numAPress = 0;
     private boolean hasABeenPressed = false;
     private boolean BHasBeenPressed = false;
     private StateENUMs.robotMode activeRobotMode = drivingPosition;
 
 
-
+    @Override
     public void init()
     {
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("Current Status", "Robot Has Been Initialized");
+
+        // WHEEL Motors
+        frontLeft = hardwareMap.get(DcMotor.class, "front left");
+        frontRight = hardwareMap.get(DcMotor.class, "front right");
+        backRight = hardwareMap.get(DcMotor.class, "back right");
+        backLeft = hardwareMap.get(DcMotor.class, "back left");
+
+        // SLIDER Motors
+        leftSliderExtension = hardwareMap.get(DcMotor.class, "left slider");
+        rightSliderExtension = hardwareMap.get(DcMotor.class, "right slider");
+
+        //INTAKE//
+        leftFlipoutIntakeServo = hardwareMap.get(Servo.class, "left intake servo");
+        rightFlipoutIntakeServo = hardwareMap.get(Servo.class, "right intake servo");
+        intakeMotor = hardwareMap.get(DcMotor.class, "intake motor");
+
+
+        //TRANSFER & ARM Servos
+        transferWheel = hardwareMap.get(CRServo.class, "transfer wheel"); //The wheel for taking pixels from the intake and holding them for placement on the backdrop
+        transferRotation = hardwareMap.get(Servo.class, "transfer rotation");//This is essentially the "wrist" of the robot and it is controls the orientation of the transfer
+        transferArm = hardwareMap.get(CRServo.class, "arm rotation"); //This is the rotation for the arm holding the transfer, essentially the "elbow" or "shoulder" of the robot
+        transferDoor = hardwareMap.get(Servo.class, "door"); //The door is for dropping pixels out of the transfer
+
 
         leftSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         leftSliderExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSliderExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //telemetry.addData("Current Status", "Robot Has Been Initialized");
 
         transferDoor.setPosition(doorClosedPosition);
 
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
+
     }
+    @Override
     public void init_loop() {
         //Anything here would run after the PLAY button was pressed
     }
 
+    @Override
     public void loop()
     {
 
@@ -137,11 +159,8 @@ public class Meet3Code {
                 ///////////////////////////////////////////////////////////////////////////////////////////
                 if(gamepad1.x) { //if X is pressed X will spit out pixels
                     intakeMotor.setPower(-intakeMotorPower); //turn the intakes the opposite way
-                    intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
                 }else if(gamepad1.y){ //if Y is pressed Y will spit out pixels as well as pixels already stored in the robot
                     intakeMotor.setPower(-intakeMotorPower); //turn the intakes the opposite way
-                    intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     transferWheel.setPower(-transferWheelTurnPower); //turns the transfer wheel the other way to spit out pixels
                 }else if(gamepad1.a) { //if A is pressed  A will intake pixels
                     leftFlipoutIntakeServo.setPosition(intakePosition); //stretch out the intakes
@@ -227,17 +246,5 @@ public class Meet3Code {
             }
             transferRotation.setPosition(transferRotationIntakePosition); //should be resting position
         }
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }
