@@ -1,9 +1,6 @@
 
 package org.firstinspires.ftc.teamcode.Meet3;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.boardPosition;
 import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.drivingPosition;
 
@@ -12,12 +9,10 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs;
-import org.firstinspires.ftc.teamcode.utildata.ArmPositionENUM;
 
 
 @TeleOp(name="Meet 3 TeleOp", group="Iterative OpMode")
@@ -51,13 +46,7 @@ public class Meet3Code extends OpMode
     private double transferWheelTurnPower = 1; /* maybe change this*/
     private boolean turnTransferWheel = false;
 
-    //get our analog input from the hardwareMap
-    AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "transferArm");
 
-    // get the voltage of our analog line
-// divide by 3.3 (the max voltage) to get a value between 0 and 1
-// multiply by 360 to convert it to 0 to 360 degrees
-    double position = analogInput.getVoltage() / 3.3 * 360;
 
     private double transferArmBoardTarget = 200; /*measure value*/ //this is the variable that measures how much the arm must turn to reach the board
     private double transferArmRestTarget = 0; /*measure value*/ //this is the variable that measures how much the arm must turn to reach resting position
@@ -66,13 +55,15 @@ public class Meet3Code extends OpMode
     private double transferArmPower = 1;
     private double transferRotationDepositPosition = 1;/*measure the value*/
     private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the starting position*/
-    private double storedIntakePosition = 0; /*change this*//*this is when the flipout intakes are retracted*/
-    private double intakePosition = 1; /*change this*//*this is when the flipout intakes are deployed*/
+    private double rightStoredIntakePosition = 0.435; /*this is when the right flipout intake is retracted*/
+    private double leftStoredIntakePosition = 0.57; /*this is when the left flipout intake is retracted*/
+    private double rightIntakePosition = 0.15; /*this is when the right flipout intake is deployed*/
+    private double leftIntakePosition = 0.87; /*this is when the left flipout intake is deployed*/
 
 
 
     //MOTOR POSITION VARIABLES
-    private int extentionLength = 25 /*change this value probably*/;
+    private int extentionLength = 1000 /*change this value probably*/;
     private double extentionPower = 1;
     private int extentionChange = 1; // how much a bumper trigger increases or decreases the extention length
     private int sliderRest = 0; /* this is the rest. Maybe change*/
@@ -114,6 +105,16 @@ public class Meet3Code extends OpMode
         transferDoor = hardwareMap.get(Servo.class, "door"); //The door is for dropping pixels out of the transfer
 
 
+
+
+        //get our analog input from the hardwareMap
+        AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "transferArm");
+
+        // get the voltage of our analog line
+// divide by 3.3 (the max voltage) to get a value between 0 and 1
+// multiply by 360 to convert it to 0 to 360 degrees
+        double position = analogInput.getVoltage() / 3.3 * 360;
+
         leftSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -124,7 +125,8 @@ public class Meet3Code extends OpMode
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
+        rightSliderExtension.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightSliderExtension.setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
     @Override
@@ -163,14 +165,14 @@ public class Meet3Code extends OpMode
                     intakeMotor.setPower(-intakeMotorPower); //turn the intakes the opposite way
                     transferWheel.setPower(-transferWheelTurnPower); //turns the transfer wheel the other way to spit out pixels
                 }else if(gamepad1.a) { //if A is pressed  A will intake pixels
-                    leftFlipoutIntakeServo.setPosition(intakePosition); //stretch out the intakes
-                    rightFlipoutIntakeServo.setPosition(intakePosition); //stretch out the intakes
+                    leftFlipoutIntakeServo.setPosition(rightIntakePosition); //stretch out the intakes
+                    rightFlipoutIntakeServo.setPosition(leftIntakePosition); //stretch out the intakes
                     intakeMotor.setPower(intakeMotorPower); //turn the intakes
                     intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     transferWheel.setPower(transferWheelTurnPower); // turns the transfer wheel
                 }else{
-                    leftFlipoutIntakeServo.setPosition(storedIntakePosition); //store the intakes
-                    rightFlipoutIntakeServo.setPosition(storedIntakePosition); //store the intakes
+                    leftFlipoutIntakeServo.setPosition(rightStoredIntakePosition); //store the intakes
+                    rightFlipoutIntakeServo.setPosition(leftStoredIntakePosition); //store the intakes
                     intakeMotor.setPower(0); //stop turning the intakes
                     transferWheel.setPower(0); // makes sure the transfer wheel isn't turning when nothing is pressed
                     if (gamepad1.b && !BHasBeenPressed) { //if nothing else was pressed, check if b was pressed to switch modes
@@ -226,7 +228,7 @@ public class Meet3Code extends OpMode
             rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            if(position < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
+            if(/*position*/ 0 < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
                 transferArm.setPower(transferArmPower); //maybe swap the sign
             }
             transferRotation.setPosition(transferRotationDepositPosition);
@@ -241,7 +243,7 @@ public class Meet3Code extends OpMode
             rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            if(position > transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
+            if(/*position > transferArmRestTarget*/0<transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
                 transferArm.setPower(-transferArmPower); //maybe swap the sign
             }
             transferRotation.setPosition(transferRotationIntakePosition); //should be resting position
