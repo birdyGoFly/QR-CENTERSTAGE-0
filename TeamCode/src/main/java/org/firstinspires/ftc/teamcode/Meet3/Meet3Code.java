@@ -52,7 +52,7 @@ public class Meet3Code extends OpMode
     private boolean turnTransferWheel = false;
 
     //get our analog input from the hardwareMap
-    AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "transferArm");
+    AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "arm rotation");
 
     // get the voltage of our analog line
 // divide by 3.3 (the max voltage) to get a value between 0 and 1
@@ -241,9 +241,9 @@ public class Meet3Code extends OpMode
             rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            if(position > transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
-                transferArm.setPower(-transferArmPower); //maybe swap the sign
-            }
+            //if(position > transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
+              //  transferArm.setPower(-transferArmPower); //maybe swap the sign
+            //}
             transferRotation.setPosition(transferRotationIntakePosition); //should be resting position
         }
     }
