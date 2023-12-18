@@ -120,9 +120,9 @@ public class MyFirstTeleOp extends OpMode {
         linAcRotation.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         linAcRotation.setPower(0.25);
 
-        linAc.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        linAc.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        linAc.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //linAc.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //linAc.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //linAc.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //linAc.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //linAc.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -267,12 +267,20 @@ public class MyFirstTeleOp extends OpMode {
         }
 
         if(gamepad1.right_trigger >= 0.1){
-            linAcRotation.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linAcRotationTarget = linAcRotationTarget + 3;
+            linAcRotation.setPower(0.5);
         }
         if(gamepad1.right_bumper){
-            linAcRotation.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            linAcRotationTarget = linAcRotationTarget - 3;
+            linAcRotation.setPower(0.5);
+        }
+        if(gamepad1.left_trigger >= 0.1){
+            linAc.setPower(1);
+            telemetry.addLine("AHHHHHHH left trigger");
+
+        }else if(gamepad1.left_bumper){
+            linAc.setPower(-1);
+            telemetry.addLine("AHHHHHHH left bumper");
+        }else {
+            linAc.setPower(0);
         }
 
 
@@ -331,7 +339,7 @@ public class MyFirstTeleOp extends OpMode {
 
             }
         else{
-            if(gamepad1.right_bumper)
+            if(gamepad1.right_bumper);
             linAcRotation.setPower(0.25);
             linAcRotationTarget = 0;
             linAc.setTargetPosition(0);

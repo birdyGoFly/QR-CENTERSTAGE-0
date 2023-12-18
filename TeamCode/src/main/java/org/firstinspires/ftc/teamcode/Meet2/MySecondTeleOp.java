@@ -44,8 +44,8 @@ public class MySecondTeleOp extends OpMode {
     private Servo gate = null;
     private Servo drone = null;
     private Servo wrist = null;
-    private Servo grab1 = null;
-    private Servo grab2 = null;
+    //private Servo grab1 = null;
+    //private Servo grab2 = null;
 
     //╦  ╦┌─┐┬─┐┬┌─┐┌┐ ┬  ┌─┐┌─┐
     //╚╗╔╝├─┤├┬┘│├─┤├┴┐│  ├┤ └─┐
@@ -114,8 +114,8 @@ public class MySecondTeleOp extends OpMode {
         //gate = hardwareMap.get(Servo.class, "gate servo"); //This is a backup for if we revert back to the toggling gate
         drone = hardwareMap.get(Servo.class, "drone servo");
         wrist = hardwareMap.get(Servo.class, "wrist servo");//The "wrist" is the servo which controls the rotation of the grabber.
-        grab1 = hardwareMap.get(Servo.class, "left grabber servo"); //This is the LEFT grabber.
-        grab2 = hardwareMap.get(Servo.class, "right grabber servo"); //This is the RIGHT grabber.
+        //grab1 = hardwareMap.get(Servo.class, "left grabber servo"); //This is the LEFT grabber.
+        //grab2 = hardwareMap.get(Servo.class, "right grabber servo"); //This is the RIGHT grabber.
 
         //SETUP// This sets the directions for the motors for mecanum drive (being able to drive forward, backward, left, right, rotate left, and rotate right).
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -312,17 +312,17 @@ public class MySecondTeleOp extends OpMode {
 
     private void leftGrabber(boolean leftGrabberCurrentlyOpen) {
         if (leftGrabberCurrentlyOpen) {
-            grab1.setPosition(grabberClosedPosition);
+           // grab1.setPosition(grabberClosedPosition);
         } else if (!leftGrabberCurrentlyOpen) {
-            grab1.setPosition(grabberOpenPosition);
+            //grab1.setPosition(grabberOpenPosition);
         }
     }
 
     private void rightGrabber(boolean rightGrabberCurrentlyOpen) {
         if (rightGrabberCurrentlyOpen) {
-            grab2.setPosition(grabberClosedPosition);
+           // grab2.setPosition(grabberClosedPosition);
         } else if (!rightGrabberCurrentlyOpen) {
-            grab2.setPosition(grabberOpenPosition);
+           // grab2.setPosition(grabberOpenPosition);
         }
     }
 
