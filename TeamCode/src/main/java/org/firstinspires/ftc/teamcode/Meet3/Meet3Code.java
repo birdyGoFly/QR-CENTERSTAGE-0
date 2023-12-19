@@ -54,9 +54,10 @@ public class Meet3Code extends OpMode
     private double doorClosedPosition = 0;/*change this*//*assuming that this is the starting position*/
     private double transferArmPower = 1;
     private double transferRotationDepositPosition = 1;/*measure the value*/
-    private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the starting position*/
+    private double transferRotationRestPosition = 0.925;/*change this*//*assuming that this is the starting position*/
+    private double transferRotationIntakePosition = 1;/*change this*//*assuming that this is the intake position*/
     private double rightStoredIntakePosition = 0.435; /*this is when the right flipout intake is retracted*/
-    private double leftStoredIntakePosition = 0.57; /*this is when the left flipout intake is retracted*/
+    private double leftStoredIntakePosition = 0.605; /*this is when the left flipout intake is retracted*/
     private double rightIntakePosition = 0.15; /*this is when the right flipout intake is deployed*/
     private double leftIntakePosition = 0.87; /*this is when the left flipout intake is deployed*/
 
@@ -137,6 +138,8 @@ public class Meet3Code extends OpMode
     @Override
     public void loop()
     {
+       // telemetry.addData();
+        //telemetry.update();
 
         switch (activeRobotMode) {
             case drivingPosition:
@@ -164,17 +167,20 @@ public class Meet3Code extends OpMode
                 }else if(gamepad1.y){ //if Y is pressed Y will spit out pixels as well as pixels already stored in the robot
                     intakeMotor.setPower(-intakeMotorPower); //turn the intakes the opposite way
                     transferWheel.setPower(-transferWheelTurnPower); //turns the transfer wheel the other way to spit out pixels
+                    transferRotation.setPosition(transferRotationRestPosition);
                 }else if(gamepad1.a) { //if A is pressed  A will intake pixels
                     leftFlipoutIntakeServo.setPosition(rightIntakePosition); //stretch out the intakes
                     rightFlipoutIntakeServo.setPosition(leftIntakePosition); //stretch out the intakes
                     intakeMotor.setPower(intakeMotorPower); //turn the intakes
                     intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     transferWheel.setPower(transferWheelTurnPower); // turns the transfer wheel
+                    transferRotation.setPosition(transferRotationIntakePosition);
                 }else{
                     leftFlipoutIntakeServo.setPosition(rightStoredIntakePosition); //store the intakes
                     rightFlipoutIntakeServo.setPosition(leftStoredIntakePosition); //store the intakes
                     intakeMotor.setPower(0); //stop turning the intakes
                     transferWheel.setPower(0); // makes sure the transfer wheel isn't turning when nothing is pressed
+                    transferRotation.setPosition(transferRotationIntakePosition);
                     if (gamepad1.b && !BHasBeenPressed) { //if nothing else was pressed, check if b was pressed to switch modes
                         BHasBeenPressed = true;
                         armToBoardPosition = true; //puts the sliders, arm, and transferRotation to the right position
@@ -231,7 +237,7 @@ public class Meet3Code extends OpMode
             if(/*position*/ 0 < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
                 transferArm.setPower(transferArmPower); //maybe swap the sign
             }
-            transferRotation.setPosition(transferRotationDepositPosition);
+            //transferRotation.setPosition(transferRotationDepositPosition); /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }else{
             leftSliderExtension.setTargetPosition(sliderRest); // should be resting position
             leftSliderExtension.setPower(-extentionPower); //maybe swap the signs
@@ -246,7 +252,7 @@ public class Meet3Code extends OpMode
             if(/*position > transferArmRestTarget*/0<transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
                 transferArm.setPower(-transferArmPower); //maybe swap the sign
             }
-            transferRotation.setPosition(transferRotationIntakePosition); //should be resting position
+            //transferRotation.setPosition(transferRotationRestPosition); //should be resting position /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }
     }
 }

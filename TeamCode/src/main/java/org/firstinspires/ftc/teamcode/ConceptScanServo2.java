@@ -60,7 +60,7 @@ public class ConceptScanServo2 extends LinearOpMode {
     double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
     boolean rampUp = true;
 
-    double targetPosition = 0;
+    double targetPosition = 0.5;
     int adjustmentIncrement = 3;
 
     boolean buttonCheck = false;
