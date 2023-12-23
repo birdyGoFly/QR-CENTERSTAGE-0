@@ -70,7 +70,7 @@ public class EasyOpenCVAutonomous extends OpMode {
             midCrop = YCbCr.submat(midRect);
             rightCrop = YCbCr.submat(rightRect);
 
-            Core.extractChannel(leftCrop, leftCrop, 2);
+            Core.extractChannel(leftCrop, leftCrop, 2); //1 is red and 2 is blue
             Core.extractChannel(midCrop, midCrop, 2);
             Core.extractChannel(rightCrop,rightCrop, 2);
 
@@ -85,11 +85,11 @@ public class EasyOpenCVAutonomous extends OpMode {
             telemetry.addData("right color", rightavgfin);
             telemetry.addData("mid color", midavgfin);
             telemetry.addData("left color", leftavgfin);
-            if(leftavgfin < rightavgfin && leftavgfin < midavgfin){
+            if(leftavgfin > rightavgfin && leftavgfin > midavgfin){
                 telemetry.addLine("left");
-            }else if (rightavgfin < leftavgfin && rightavgfin < midavgfin){
+            }else if (rightavgfin > leftavgfin && rightavgfin > midavgfin){
                 telemetry.addLine("right");
-            }else if(midavgfin <= leftavgfin && midavgfin <= rightavgfin){
+            }else if(midavgfin >= leftavgfin && midavgfin >= rightavgfin){
                 telemetry.addLine("middle");
             }
             return (outPut);

@@ -123,11 +123,14 @@ public class Meet3Code extends OpMode
         rightSliderExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         transferDoor.setPosition(doorClosedPosition);
-//
+
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        leftSliderExtension.setDirection(DcMotorSimple.Direction.REVERSE);
         rightSliderExtension.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightSliderExtension.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
     @Override
