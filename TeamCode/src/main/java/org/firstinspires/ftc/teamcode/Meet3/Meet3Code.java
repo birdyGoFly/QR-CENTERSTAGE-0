@@ -48,14 +48,14 @@ public class Meet3Code extends OpMode
 
 
 
-    private double transferArmBoardTarget = 200; /*measure value*/ //this is the variable that measures how much the arm must turn to reach the board
+    private double transferArmBoardTarget = 0.665; /*measure value*/ //this is the variable that measures how much the arm must turn to reach the board
     private double transferArmRestTarget = 0; /*measure value*/ //this is the variable that measures how much the arm must turn to reach resting position
     private double doorOpenPosition = 1;/*measure the value*/
     private double doorClosedPosition = 0;/*change this*//*assuming that this is the starting position*/
     private double transferArmPower = 1;
-    private double transferRotationDepositPosition = 1;/*measure the value*/
+    private double transferRotationDepositPosition = 0.125;/*measure the value*/
     private double transferRotationRestPosition = 0.925;/*change this*//*assuming that this is the starting position*/
-    private double transferRotationIntakePosition = 1;/*change this*//*assuming that this is the intake position*/
+    private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the intake position*/
     private double rightStoredIntakePosition = 0.435; /*this is when the right flipout intake is retracted*/
     private double leftStoredIntakePosition = 0.605; /*this is when the left flipout intake is retracted*/
     private double rightIntakePosition = 0.15; /*this is when the right flipout intake is deployed*/
@@ -67,7 +67,7 @@ public class Meet3Code extends OpMode
     private int extentionLength = 1000 /*change this value probably*/;
     private double extentionPower = 1;
     private int extentionChange = 1; // how much a bumper trigger increases or decreases the extention length
-    private int sliderRest = 0; /* this is the rest. Maybe change*/
+    //private int sliderRest = 0; /* this is the rest. Maybe change*/
     private int intakeMotorPower = 1; /*maybe change this*/
 
 
@@ -227,30 +227,30 @@ public class Meet3Code extends OpMode
         }
         //Runs the sliders, arm, and transferRotation to the right position
         if(armToBoardPosition){
-            leftSliderExtension.setTargetPosition(extentionLength);
-            leftSliderExtension.setPower(extentionPower); //maybe swap the signs
-            leftSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            //leftSliderExtension.setTargetPosition(extentionLength);   I commented this out
+            //leftSliderExtension.setPower(extentionPower); I commented this out //maybe swap the signs
+            //leftSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);I commented this out
+            //leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);I commented this out
 
-            rightSliderExtension.setTargetPosition(extentionLength);
-            rightSliderExtension.setPower(-extentionPower); //maybe swap the signs
-            rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            //rightSliderExtension.setTargetPosition(extentionLength);I commented this out
+            //rightSliderExtension.setPower(-extentionPower); I commented this out//maybe swap the signs
+            //rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);I commented this out
+            //rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);I commented this out
 
             if(/*position*/ 0 < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
                 transferArm.setPower(transferArmPower); //maybe swap the sign
             }
             //transferRotation.setPosition(transferRotationDepositPosition); /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }else{
-            leftSliderExtension.setTargetPosition(sliderRest); // should be resting position
-            leftSliderExtension.setPower(-extentionPower); //maybe swap the signs
-            leftSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            //leftSliderExtension.setTargetPosition(sliderRest);I commented this out // should be resting position
+            //leftSliderExtension.setPower(-extentionPower);I commented this out //maybe swap the signs
+            //leftSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);I commented this out
+            //leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);I commented this out
 
-            rightSliderExtension.setTargetPosition(sliderRest); // should be resting position
-            rightSliderExtension.setPower(extentionPower); //maybe swap the signs
-            rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            //rightSliderExtension.setTargetPosition(sliderRest);I commented this out // should be resting position
+            //rightSliderExtension.setPower(extentionPower);I commented this out //maybe swap the signs
+            //rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);I commented this out
+            //rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);I commented this out
 
             if(/*position > transferArmRestTarget*/0<transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
                 transferArm.setPower(-transferArmPower); //maybe swap the sign
