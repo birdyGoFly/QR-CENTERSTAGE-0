@@ -40,7 +40,7 @@ public class EasyOpenCVAutonomous extends OpMode {
         });
     }
     public void loop(){
-
+//
     }
     class examplePipeline extends OpenCvPipeline {
         Mat YCbCr = new Mat();
