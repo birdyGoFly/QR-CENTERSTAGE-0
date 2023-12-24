@@ -67,7 +67,7 @@ public class Meet3Code extends OpMode
     private int extentionLength = 1000 /*change this value probably*/;
     private double extentionPower = 1;
     private int extentionChange = 1; // how much a bumper trigger increases or decreases the extention length
-    //private int sliderRest = 0; /* this is the rest. Maybe change*/
+    private int sliderRest = 0; /* this is the rest. Maybe change*/
     private int intakeMotorPower = 1; /*maybe change this*/
 
 
@@ -76,6 +76,13 @@ public class Meet3Code extends OpMode
     private boolean hasABeenPressed = false;
     private boolean BHasBeenPressed = false;
     private StateENUMs.robotMode activeRobotMode = drivingPosition;
+
+    //DEBUG SLIDER SYNC CODE
+    int sliderTarget = 0;
+
+    double Kp1 = 1;
+    double Kp2 = 2;
+
 
 
     @Override
@@ -116,8 +123,8 @@ public class Meet3Code extends OpMode
 // multiply by 360 to convert it to 0 to 360 degrees
         double position = analogInput.getVoltage() / 3.3 * 360;
 
-        leftSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftSliderExtension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightSliderExtension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         leftSliderExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSliderExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -125,12 +132,17 @@ public class Meet3Code extends OpMode
         transferDoor.setPosition(doorClosedPosition);
 
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         leftSliderExtension.setDirection(DcMotorSimple.Direction.REVERSE);
         rightSliderExtension.setDirection(DcMotorSimple.Direction.REVERSE);
 
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        leftSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
     }
     @Override
@@ -143,6 +155,16 @@ public class Meet3Code extends OpMode
     {
        // telemetry.addData();
         //telemetry.update();
+
+        leftSliderExtension.setTargetPosition(sliderTarget);
+        rightSliderExtension.setTargetPosition(sliderTarget);
+
+        double power1 = Kp1 * (leftSliderExtension.getTargetPosition() - leftSliderExtension.getCurrentPosition());
+        double power2 = Kp1 * (rightSliderExtension.getTargetPosition() - rightSliderExtension.getCurrentPosition());
+
+        leftSliderExtension.setPower(power1);
+        rightSliderExtension.setPower(power2);
+
 
         switch (activeRobotMode) {
             case drivingPosition:
@@ -227,31 +249,13 @@ public class Meet3Code extends OpMode
         }
         //Runs the sliders, arm, and transferRotation to the right position
         if(armToBoardPosition){
-            //leftSliderExtension.setTargetPosition(extentionLength);   I commented this out
-            //leftSliderExtension.setPower(extentionPower); I commented this out //maybe swap the signs
-            //leftSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);I commented this out
-            //leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);I commented this out
-
-            //rightSliderExtension.setTargetPosition(extentionLength);I commented this out
-            //rightSliderExtension.setPower(-extentionPower); I commented this out//maybe swap the signs
-            //rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);I commented this out
-            //rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);I commented this out
-
+            sliderTarget = extentionLength;
             if(/*position*/ 0 < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
                 transferArm.setPower(transferArmPower); //maybe swap the sign
             }
             //transferRotation.setPosition(transferRotationDepositPosition); /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }else{
-            //leftSliderExtension.setTargetPosition(sliderRest);I commented this out // should be resting position
-            //leftSliderExtension.setPower(-extentionPower);I commented this out //maybe swap the signs
-            //leftSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);I commented this out
-            //leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);I commented this out
-
-            //rightSliderExtension.setTargetPosition(sliderRest);I commented this out // should be resting position
-            //rightSliderExtension.setPower(extentionPower);I commented this out //maybe swap the signs
-            //rightSliderExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);I commented this out
-            //rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);I commented this out
-
+            sliderTarget = sliderRest;
             if(/*position > transferArmRestTarget*/0<transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
                 transferArm.setPower(-transferArmPower); //maybe swap the sign
             }
