@@ -38,11 +38,11 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
     public static double WHEEL_RADIUS = 24/25.4; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double PARALLEL_X = 0.8326771653543307; // X is the up and down direction // 21.15mm
-    public static double PARALLEL_Y = -2.047244094488189; // Y is the strafe direction // -52mm
+    public static double PARALLEL_X = -3.0272; // X is the up and down direction // 21.15mm on old chassis, -76.89 on new chassis
+    public static double PARALLEL_Y = 6.4835; // Y is the strafe direction // -52mm on old chassis, 164.68 on new chassis
 
-    public static double PERPENDICULAR_X = -6.377952755905512; // -162mm
-    public static double PERPENDICULAR_Y = -1.30511811023622; // -33.15
+    public static double PERPENDICULAR_X = -7.648; // -162mm on old chassis, -194.26 on new chassis
+    public static double PERPENDICULAR_Y = 2.3925; // -33.15 on old chassis, 60.77 on new chassis
 
     // Parallel/Perpendicular to the forward axis
     // Parallel wheel is parallel to the forward axis
