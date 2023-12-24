@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.debug;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -60,8 +60,7 @@ public class ConceptRampMotorSpeed extends LinearOpMode {
     double  power   = 0;
     boolean rampUp  = true;
 
-
-    @Override
+@Override
     public void runOpMode() {
 
         // Connect to motor (Assume standard left wheel)
@@ -75,26 +74,7 @@ public class ConceptRampMotorSpeed extends LinearOpMode {
 
         // Ramp motor speeds till stop pressed.
         while(opModeIsActive()) {
-/*
-            // Ramp the motors, according to the rampUp variable.
-            if (rampUp) {
-                // Keep stepping up until we hit the max value.
-                power += INCREMENT ;
-                if (power >= MAX_FWD ) {
-                    power = MAX_FWD;
-                    rampUp = !rampUp;   // Switch ramp direction
-                }
-            }
-            else {
-                // Keep stepping down until we hit the min value.
-                power -= INCREMENT ;
-                if (power <= MAX_REV ) {
-                    power = MAX_REV;
-                    rampUp = !rampUp;  // Switch ramp direction
-                }
-            }
-*/
-            power = -1;
+
 
 
             // Display the current value

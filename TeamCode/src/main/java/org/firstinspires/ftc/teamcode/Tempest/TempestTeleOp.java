@@ -1,8 +1,8 @@
 
-package org.firstinspires.ftc.teamcode.Meet3;
+package org.firstinspires.ftc.teamcode.Tempest;
 
-import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.boardPosition;
-import static org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs.robotMode.drivingPosition;
+import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.boardPosition;
+import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.drivingPosition;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -12,11 +12,11 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Meet3.utility.StateENUMs;
+import org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs;
 
 
-@TeleOp(name="Meet 3 TeleOp", group="Iterative OpMode")
-public class Meet3Code extends OpMode
+@TeleOp(name="Tempest TeleOp", group="Iterative OpMode")
+public class TempestTeleOp extends OpMode
 {
 
     //╔╦╗┌─┐┌┬┐┌─┐┬─┐┌─┐
