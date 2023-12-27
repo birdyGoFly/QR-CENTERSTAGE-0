@@ -85,6 +85,8 @@ public class TempestTeleOp extends OpMode
     double Kp1 = 1;
     double Kp2 = 2;
 
+    int synchronizationKillswitchThreshold = 150; //TODO: SET THIS VALUE TO THE MAXIMUM ERROR OF SYNCHRONIZATION THE SLIDERS CAN HAVE BEFORE THEY RISK DAMAGING THE ROBOT
+    double orientationAdjustmentSensitivity = 0.25; //TODO: TUNE THIS VALUE
 
 
     @Override
@@ -169,7 +171,7 @@ public class TempestTeleOp extends OpMode
         telemetry.addData("Right Slider Velocity", rightSliderExtension.getVelocity());
         telemetry.update();
 
-        /** This sets the power to vary depending on the error. Does not work as of 12/24/23 (happy holidays)*/
+        /* This sets the power to vary depending on the error. Does not work as of 12/24/23 (happy holidays)*/
 
        // double power1 = Kp1 * (leftSliderExtension.getTargetPosition() - leftSliderExtension.getCurrentPosition());
        // double power2 = Kp1 * (rightSliderExtension.getTargetPosition() - rightSliderExtension.getCurrentPosition());
@@ -180,15 +182,14 @@ public class TempestTeleOp extends OpMode
         leftSliderExtension.setTargetPosition(sliderTarget);
         rightSliderExtension.setTargetPosition(sliderTarget);
 
-
-
-
         leftSliderExtension.setPower(1);
         rightSliderExtension.setPower(1);
 
+        sliderAutoSafetyKillswitch(leftSliderExtension.getCurrentPosition(), rightSliderExtension.getCurrentPosition(), synchronizationKillswitchThreshold);
+
         switch (activeRobotMode) {
             case drivingPosition:
-                /**DRIVING CODE COPIED FROM MEET 2*/// -------------------------------------------------------
+                /*DRIVING CODE COPIED FROM MEET 2*/// -------------------------------------------------------
                 double y = -gamepad1.right_stick_y;
                 double x = gamepad1.right_stick_x * 1.1; // The multiplier is to counteract imperfect strafing.
                 double rx = gamepad1.left_stick_x;
@@ -238,7 +239,7 @@ public class TempestTeleOp extends OpMode
                 }
                 break;
                 //----------------------------------------------------------------------------------
-                /**This is only for when the robot is in board (or placement) position*///----------
+                /*This is only for when the robot is in board (or placement) position*///----------
             case boardPosition:
                 if(gamepad1.a){ //if A is pressed
                     hasABeenPressed = true;
@@ -270,7 +271,7 @@ public class TempestTeleOp extends OpMode
                 }
                 break;
         }
-        //Runs the sliders, arm, and transferRotation to the right position
+        //Runs the sliders, arm, and transferRotation to the right position for pixel placement
         if(armToBoardPosition){
             sliderTarget = extentionLength;
             if(/*position*/ 0 < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
@@ -285,4 +286,33 @@ public class TempestTeleOp extends OpMode
             //transferRotation.setPosition(transferRotationRestPosition); //should be resting position /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }
     }
+    void sliderAutoSafetyKillswitch(int leftSliderPosition, int rightSliderPosition, int syncKillswitchThreshold) //Kill power to both sliders to prevent the arm from ripping itself apart
+    {
+        if (Math.abs(Math.abs(leftSliderPosition)-Math.abs(rightSliderPosition)) < syncKillswitchThreshold)
+        {
+            leftSliderExtension.setMotorDisable();
+            rightSliderExtension.setMotorDisable();
+        }
+    }
+
+    void autoBackdropOrientation(double leftDistanceSensor, double rightDistanceSensor, double rotationSensitivity)
+    {
+      double orientationError = getOrientationError(/*left sensor*/, /*right sensor*/)
+      double leftWheels = 0;
+      double rightWheels = 0;
+
+      //TODO: Incorporate the adjusted orientation into the drive wheels
+
+    }
+
+    double getOrientationError(double leftDistanceSensor, double rightDistanceSensor)
+    {
+        return leftDistanceSensor - rightDistanceSensor;
+    }
+
+
+
+
+
+
 }
