@@ -4,9 +4,11 @@ package org.firstinspires.ftc.teamcode.Tempest;
 import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.boardPosition;
 import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.drivingPosition;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -26,8 +28,8 @@ public class TempestTeleOp extends OpMode
     private DcMotor frontRight = null;
     private DcMotor backRight = null;
     private DcMotor backLeft = null;
-    private DcMotor leftSliderExtension = null;
-    private DcMotor rightSliderExtension = null;
+    private DcMotorEx leftSliderExtension = null;
+    private DcMotorEx rightSliderExtension = null;
     private DcMotor intakeMotor = null;
 
     //╔═╗┌─┐┬─┐┬  ┬┌─┐┌─┐
@@ -88,6 +90,9 @@ public class TempestTeleOp extends OpMode
     @Override
     public void init()
     {
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = dashboard.getTelemetry();
+
         telemetry.addData("Current Status", "Robot Has Been Initialized");
 
         // WHEEL Motors
@@ -97,8 +102,8 @@ public class TempestTeleOp extends OpMode
         backLeft = hardwareMap.get(DcMotor.class, "back left");
 
         // SLIDER Motors
-        leftSliderExtension = hardwareMap.get(DcMotor.class, "left slider");
-        rightSliderExtension = hardwareMap.get(DcMotor.class, "right slider");
+        leftSliderExtension = hardwareMap.get(DcMotorEx.class, "left slider");
+        rightSliderExtension = hardwareMap.get(DcMotorEx.class, "right slider");
 
         //INTAKE//
         leftFlipoutIntakeServo = hardwareMap.get(Servo.class, "left intake servo");
@@ -123,8 +128,8 @@ public class TempestTeleOp extends OpMode
 // multiply by 360 to convert it to 0 to 360 degrees
         double position = analogInput.getVoltage() / 3.3 * 360;
 
-        leftSliderExtension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightSliderExtension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         leftSliderExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSliderExtension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -135,7 +140,7 @@ public class TempestTeleOp extends OpMode
         leftSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSliderExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        leftSliderExtension.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftSliderExtension.setDirection(DcMotorSimple.Direction.FORWARD);
         rightSliderExtension.setDirection(DcMotorSimple.Direction.REVERSE);
 
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -153,26 +158,41 @@ public class TempestTeleOp extends OpMode
     @Override
     public void loop()
     {
-       // telemetry.addData();
-        //telemetry.update();
+        telemetry.setMsTransmissionInterval(50);
+        telemetry.addData("Left Slider Position", leftSliderExtension.getCurrentPosition());
+        telemetry.addData("Right Slider Position", rightSliderExtension.getCurrentPosition());
+        telemetry.addData("Left Slider Error", sliderTarget-leftSliderExtension.getCurrentPosition());
+        telemetry.addData("Right Slider Error", sliderTarget-rightSliderExtension.getCurrentPosition());
+        telemetry.addData("Left Slider isBusy", leftSliderExtension.isBusy());
+        telemetry.addData("Right Slider isBusy", rightSliderExtension.isBusy());
+        telemetry.addData("Left Slider Velocity", leftSliderExtension.getVelocity());
+        telemetry.addData("Right Slider Velocity", rightSliderExtension.getVelocity());
+        telemetry.update();
+
+        /** This sets the power to vary depending on the error. Does not work as of 12/24/23 (happy holidays)*/
+
+       // double power1 = Kp1 * (leftSliderExtension.getTargetPosition() - leftSliderExtension.getCurrentPosition());
+       // double power2 = Kp1 * (rightSliderExtension.getTargetPosition() - rightSliderExtension.getCurrentPosition());
+
+        //leftSliderExtension.setPower(power1);
+        //rightSliderExtension.setPower(power2);
 
         leftSliderExtension.setTargetPosition(sliderTarget);
         rightSliderExtension.setTargetPosition(sliderTarget);
 
-        double power1 = Kp1 * (leftSliderExtension.getTargetPosition() - leftSliderExtension.getCurrentPosition());
-        double power2 = Kp1 * (rightSliderExtension.getTargetPosition() - rightSliderExtension.getCurrentPosition());
 
-        leftSliderExtension.setPower(power1);
-        rightSliderExtension.setPower(power2);
 
+
+        leftSliderExtension.setPower(1);
+        rightSliderExtension.setPower(1);
 
         switch (activeRobotMode) {
             case drivingPosition:
-                //DRIVING CODE COPIED FROM MEET 2 -------------------------------------------------------
+                /**DRIVING CODE COPIED FROM MEET 2*/// -------------------------------------------------------
                 double y = -gamepad1.right_stick_y;
                 double x = gamepad1.right_stick_x * 1.1; // The multiplier is to counteract imperfect strafing.
                 double rx = gamepad1.left_stick_x;
-//
+
                 // Denominator is the largest motor power (absolute value) or 1
                 // This ensures all the powers maintain the same ratio,
                 // but only if at least one is out of the range [-1, 1]
@@ -186,6 +206,7 @@ public class TempestTeleOp extends OpMode
                 backLeft.setPower(backLeftPower);
                 frontRight.setPower(frontRightPower);
                 backRight.setPower(backRightPower);
+
                 ///////////////////////////////////////////////////////////////////////////////////////////
                 if(gamepad1.x) { //if X is pressed X will spit out pixels
                     intakeMotor.setPower(-intakeMotorPower); //turn the intakes the opposite way
@@ -216,6 +237,8 @@ public class TempestTeleOp extends OpMode
                     }
                 }
                 break;
+                //----------------------------------------------------------------------------------
+                /**This is only for when the robot is in board (or placement) position*///----------
             case boardPosition:
                 if(gamepad1.a){ //if A is pressed
                     hasABeenPressed = true;

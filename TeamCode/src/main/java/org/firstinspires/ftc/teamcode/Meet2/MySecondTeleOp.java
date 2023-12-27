@@ -23,7 +23,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 ☐ Hang macro
 
  */
-
+@Disabled
 @TeleOp(name="Meet 2 TeleOp", group="Iterative OpMode")
 
 public class MySecondTeleOp extends OpMode {
