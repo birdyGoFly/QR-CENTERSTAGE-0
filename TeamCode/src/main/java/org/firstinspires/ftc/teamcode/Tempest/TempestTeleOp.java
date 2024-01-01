@@ -344,19 +344,17 @@ public class TempestTeleOp extends OpMode
         //Runs the sliders, arm, and transferRotation to the right position for pixel placement
         if(armToBoardPosition){
             sliderTarget = extensionLength;
-            if(/*position*/ 0 < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
-                transferArm.setPosition(transferArmRestTarget); //maybe swap the sign
-            }
+            transferArm.setPosition(transferArmRestTarget);
             //transferRotation.setPosition(transferRotationDepositPosition); /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
-        }else{
+        }
+        else
+        {
             sliderTarget = sliderRest;
-            if(/*position > transferArmRestTarget*/0<transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
-                transferArm.setPosition(transferArmRestTarget);
-            }
+            transferArm.setPosition(transferArmRestTarget);
             //transferRotation.setPosition(transferRotationRestPosition); //should be resting position /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }
     }
-//
+
     //FUNCTIONS
     void sliderAutoSafetyKillswitch(int leftSliderPosition, int rightSliderPosition, int syncKillswitchThreshold) //Kill power to both sliders to prevent the arm from ripping itself apart
     {
