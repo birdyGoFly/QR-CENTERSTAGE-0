@@ -65,12 +65,8 @@ public class SensorREVColorDistance extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
-
         PixelColor.PixelColors DetectedColor;
-
-
-       /*
+/*
        enum PixelColor
        {
            WHITE = 0,
@@ -191,26 +187,6 @@ public class SensorREVColorDistance extends LinearOpMode {
             {
                 telemetry.addData("Pixel 2 Color", "NONE");
             }
-
-
-
-
-           /* if (sensorDistance2.getDistance(DistanceUnit.CM) < 4 && sensorDistance1.getDistance(DistanceUnit.CM) < 4)
-            {
-                servo.setPower(0);
-            }
-            else
-            {
-                servo.setPower(1);
-            }*/
-
-
-
-
-
-
-
-
             // change the background color to match the color detected by the RGB sensor.
             // pass a reference to the hue, saturation, and value array as an argument
             // to the HSVToColor method.
@@ -219,12 +195,8 @@ public class SensorREVColorDistance extends LinearOpMode {
                     relativeLayout.setBackgroundColor(Color.HSVToColor(0xff, values));
                 }
             });
-
-
             telemetry.update();
         }
-
-
         // Set the panel back to the default color
         relativeLayout.post(new Runnable() {
             public void run() {
