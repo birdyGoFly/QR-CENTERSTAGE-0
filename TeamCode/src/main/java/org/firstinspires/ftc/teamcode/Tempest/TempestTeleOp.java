@@ -51,7 +51,7 @@ public class TempestTeleOp extends OpMode
     private Servo leftFlipoutIntakeServo = null;
     private Servo rightFlipoutIntakeServo = null;
 
-    //SERVO POSITION VARIABLES
+    //SERVO POSITION VARIABLES//
     private boolean armToBoardPosition = false;
     private double transferWheelTurnPower = 1; /* maybe change this*/
     private boolean turnTransferWheel = false;
