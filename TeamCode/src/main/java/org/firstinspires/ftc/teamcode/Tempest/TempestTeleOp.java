@@ -4,17 +4,25 @@ package org.firstinspires.ftc.teamcode.Tempest;
 import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.boardPosition;
 import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.drivingPosition;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs;
+import org.firstinspires.ftc.teamcode.utildata.PixelColor;
 
 
 @TeleOp(name="Tempest TeleOp", group="Iterative OpMode")
@@ -48,10 +56,33 @@ public class TempestTeleOp extends OpMode
     private double transferWheelTurnPower = 1; /* maybe change this*/
     private boolean turnTransferWheel = false;
 
+    //SENSORS
+    /** Transfer color sensor setup*/
+    ColorSensor sensorColor1;
+    DistanceSensor sensorDistance1;
+    ColorSensor sensorColor2;
+    DistanceSensor sensorDistance2;
 
+    //hsvValues is an array that will hold the hue, saturation, and value information for the transfer color sensors.
+    float hsvValues[] = {0F, 0F, 0F};
 
-    private double transferArmBoardTarget = 0.665; /*measure value*/ //this is the variable that measures how much the arm must turn to reach the board
-    private double transferArmRestTarget = 0; /*measure value*/ //this is the variable that measures how much the arm must turn to reach resting position
+    //Values is a reference to the hsvValues array.
+    final float values[] = hsvValues;
+
+    // sometimes it helps to multiply the raw RGB values with a scale factor
+    // to amplify/attentuate the measured values.
+    final double SCALE_FACTOR = 255;
+    PixelColor.PixelColors DetectedColor;
+
+    //Get a reference to the RelativeLayout so we can change the background
+    //color of the Robot Controller app to match the hue detected by the RGB sensor.
+    int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+    final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
+
+    //----------------------------------------------------------------------------------------------
+
+    private double transferArmBoardTarget = 0.7; /*measure value*/ //Arm rotation target for pixel placement
+    private double transferArmRestTarget = 0; /*measure value*/ //Arm rotation target when stowing transfer within the robot
     private double doorOpenPosition = 1;/*measure the value*/
     private double doorClosedPosition = 0;/*change this*//*assuming that this is the starting position*/
     private double transferArmPower = 1;
@@ -64,18 +95,17 @@ public class TempestTeleOp extends OpMode
     private double leftIntakePosition = 0.87; /*this is when the left flipout intake is deployed*/
 
 
-
     //MOTOR POSITION VARIABLES
-    private int extentionLength = 1000 /*change this value probably*/;
-    private double extentionPower = 1;
-    private int extentionChange = 1; // how much a bumper trigger increases or decreases the extention length
-    private int sliderRest = 0; /* this is the rest. Maybe change*/
-    private int intakeMotorPower = 1; /*maybe change this*/
+    private int extensionLength = 1000 /*change this value probably*/;
+    private double extensionPower = 1;
+    private int extensionChange = 1; // how much a bumper trigger increases or decreases the extention length
+    private int sliderRest = 0; /* this is the retracted position. Maybe change*/
+    private int intakeMotorPower = 1;
 
 
     //Variables to check how many times "A" or "B" has been pressed
     private int numAPress = 0;
-    private boolean hasABeenPressed = false;
+    private boolean isAPressed = false;
     private boolean BHasBeenPressed = false;
     private StateENUMs.robotMode activeRobotMode = drivingPosition;
 
@@ -119,16 +149,24 @@ public class TempestTeleOp extends OpMode
         transferArm = hardwareMap.get(CRServo.class, "arm rotation"); //This is the rotation for the arm holding the transfer, essentially the "elbow" or "shoulder" of the robot
         transferDoor = hardwareMap.get(Servo.class, "door"); //The door is for dropping pixels out of the transfer
 
-
-
+        //Get a reference to the color sensor.
+        sensorColor1 = hardwareMap.get(ColorSensor.class, "Transfer Color Sensor 1");
+        //Get a reference to the distance sensor that shares the same name.
+        sensorDistance1 = hardwareMap.get(DistanceSensor.class, "Transfer Color Sensor 1");
+        //Get a reference to the other color sensor.
+        sensorColor2 = hardwareMap.get(ColorSensor.class, "Transfer Color Sensor 2");
+        //Get a reference to the other distance sensor that shares the same name.
+        sensorDistance2 = hardwareMap.get(DistanceSensor.class, "Transfer Color Sensor 2");
 
         //get our analog input from the hardwareMap
         AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "transferArm");
 
         // get the voltage of our analog line
-// divide by 3.3 (the max voltage) to get a value between 0 and 1
-// multiply by 360 to convert it to 0 to 360 degrees
+        // divide by 3.3 (the max voltage) to get a value between 0 and 1
+        // multiply by 360 to convert it to 0 to 360 degrees
         double position = analogInput.getVoltage() / 3.3 * 360;
+
+        //-------------------------------------------------
 
         leftSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightSliderExtension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -160,7 +198,7 @@ public class TempestTeleOp extends OpMode
     @Override
     public void loop()
     {
-        telemetry.setMsTransmissionInterval(50);
+        telemetry.setMsTransmissionInterval(100);
         telemetry.addData("Left Slider Position", leftSliderExtension.getCurrentPosition());
         telemetry.addData("Right Slider Position", rightSliderExtension.getCurrentPosition());
         telemetry.addData("Left Slider Error", sliderTarget-leftSliderExtension.getCurrentPosition());
@@ -169,6 +207,7 @@ public class TempestTeleOp extends OpMode
         telemetry.addData("Right Slider isBusy", rightSliderExtension.isBusy());
         telemetry.addData("Left Slider Velocity", leftSliderExtension.getVelocity());
         telemetry.addData("Right Slider Velocity", rightSliderExtension.getVelocity());
+        telemetry.addData("Slider Synchronization Error", Math.abs(Math.abs(leftSliderExtension.getCurrentPosition())-Math.abs(rightSliderExtension.getCurrentPosition())));
         telemetry.update();
 
         /* This sets the power to vary depending on the error. Does not work as of 12/24/23 (happy holidays)*/
@@ -186,6 +225,33 @@ public class TempestTeleOp extends OpMode
         rightSliderExtension.setPower(1);
 
         sliderAutoSafetyKillswitch(leftSliderExtension.getCurrentPosition(), rightSliderExtension.getCurrentPosition(), synchronizationKillswitchThreshold);
+
+        // convert the RGB values to HSV values.
+        // multiply by the SCALE_FACTOR.
+        // then cast it back to int (SCALE_FACTOR is a double)
+        //This is for sensor 1
+        Color.RGBToHSV((int) (sensorColor1.red() * SCALE_FACTOR),
+                (int) (sensorColor1.green() * SCALE_FACTOR),
+                (int) (sensorColor1.blue() * SCALE_FACTOR),
+                hsvValues);
+        //This is for sensor 2
+        Color.RGBToHSV((int) (sensorColor2.red() * SCALE_FACTOR),
+                (int) (sensorColor2.green() * SCALE_FACTOR),
+                (int) (sensorColor2.blue() * SCALE_FACTOR),
+                hsvValues);
+        //Display the name of the pixel color on the telemetry
+        sensor1PixelDetection();
+        sensor2PixelDetection();
+
+        // change the background color to match the color detected by the RGB sensor.
+        // pass a reference to the hue, saturation, and value array as an argument
+        // to the HSVToColor method.
+        relativeLayout.post(new Runnable() {
+            public void run() {
+                relativeLayout.setBackgroundColor(Color.HSVToColor(0xff, values));
+            }
+        });
+
 
         switch (activeRobotMode) {
             case drivingPosition:
@@ -209,15 +275,16 @@ public class TempestTeleOp extends OpMode
                 backRight.setPower(backRightPower);
 
                 ///////////////////////////////////////////////////////////////////////////////////////////
-                if(gamepad1.x) { //if X is pressed X will spit out pixels
-                    intakeMotor.setPower(-intakeMotorPower); //turn the intakes the opposite way
-                }else if(gamepad1.y){ //if Y is pressed Y will spit out pixels as well as pixels already stored in the robot
-                    intakeMotor.setPower(-intakeMotorPower); //turn the intakes the opposite way
-                    transferWheel.setPower(-transferWheelTurnPower); //turns the transfer wheel the other way to spit out pixels
+                // FLOOR-MODE TRANSFER CONTROL | Exclusively use this mode if there are arm issues and you need to be a pushbot
+                if(gamepad1.x) { //If X is pressed the intake will spit out pixels (spin in reverse). The transfer wheel will not spin
+                    intakeMotor.setPower(-intakeMotorPower); //Rotate the intake in reverse
+                }else if(gamepad1.y){ //If Y is pressed the robot will spit out pixels as well as pixels already stored in the transfer wheel, by rotating both the wheel and intake in reverse
+                    intakeMotor.setPower(-intakeMotorPower); //Spin the intake in reverse
+                    transferWheel.setPower(-transferWheelTurnPower); //Turns the transfer wheel in reverse to spit out pixels
                     transferRotation.setPosition(transferRotationRestPosition);
                 }else if(gamepad1.a) { //if A is pressed  A will intake pixels
-                    leftFlipoutIntakeServo.setPosition(rightIntakePosition); //stretch out the intakes
-                    rightFlipoutIntakeServo.setPosition(leftIntakePosition); //stretch out the intakes
+                    leftFlipoutIntakeServo.setPosition(rightIntakePosition); //Unfold the left side of the intake
+                    rightFlipoutIntakeServo.setPosition(leftIntakePosition); //Unfold the right side of the intake
                     intakeMotor.setPower(intakeMotorPower); //turn the intakes
                     intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     transferWheel.setPower(transferWheelTurnPower); // turns the transfer wheel
@@ -225,8 +292,8 @@ public class TempestTeleOp extends OpMode
                 }else{
                     leftFlipoutIntakeServo.setPosition(rightStoredIntakePosition); //store the intakes
                     rightFlipoutIntakeServo.setPosition(leftStoredIntakePosition); //store the intakes
-                    intakeMotor.setPower(0); //stop turning the intakes
-                    transferWheel.setPower(0); // makes sure the transfer wheel isn't turning when nothing is pressed
+                    intakeMotor.setPower(0); //Stop turning the intake motor
+                    transferWheel.setPower(0); //Keeps the transfer wheel from turning when nothing is pressed
                     transferRotation.setPosition(transferRotationIntakePosition);
                     if (gamepad1.b && !BHasBeenPressed) { //if nothing else was pressed, check if b was pressed to switch modes
                         BHasBeenPressed = true;
@@ -239,10 +306,10 @@ public class TempestTeleOp extends OpMode
                 }
                 break;
                 //----------------------------------------------------------------------------------
-                /*This is only for when the robot is in board (or placement) position*///----------
+                //This is only for when the robot is in board (or placement) position ----------
             case boardPosition:
-                if(gamepad1.a){ //if A is pressed
-                    hasABeenPressed = true;
+                if(gamepad1.a){ //Check if A is pressed for placing 1st and 2nd pixel
+                    isAPressed = true; //Register that A has been pressed
                     if(numAPress == 0){
                         //first press opens door
                         transferDoor.setPosition(doorOpenPosition);
@@ -250,19 +317,22 @@ public class TempestTeleOp extends OpMode
                         //second press turns wheel
                         transferWheel.setPower(transferWheelTurnPower);
                     }
-                }else if(hasABeenPressed){
-                    hasABeenPressed = false;
+                }else if(isAPressed){ //When A is released, register that as a numAPress
+                    isAPressed = false;
                     numAPress++;
                     //notes that A has been pressed
                 }else if(gamepad1.right_bumper){ //if A is not pressed then checks if the bumpers are pressed
-                    extentionLength += extentionChange;
+                    extensionLength += extensionChange;
                 } else if (gamepad1.left_bumper) {
 
                 }else { //if nothing was pressed then checks if B was pressed
                     if (gamepad1.b && !BHasBeenPressed) {
-                        transferWheel.setPower(0); // makes sure the transfer wheel stops turning when switching into driving mode
+                        transferWheel.setPower(0);
+                        // makes sure the transfer wheel stops
+                        // turning when switching into driving mode
                         BHasBeenPressed = true;
-                        armToBoardPosition = false; //puts the sliders, arm, and transferRotation to the right position
+                        armToBoardPosition = false;
+                        //Puts the sliders, arm, and transferRotation to the right position
                         activeRobotMode = drivingPosition; //switches mode
                         numAPress = 0; //resets how many times A has been pressed
                     } else if(!gamepad1.b){ //makes sure B cannot be held
@@ -273,7 +343,7 @@ public class TempestTeleOp extends OpMode
         }
         //Runs the sliders, arm, and transferRotation to the right position for pixel placement
         if(armToBoardPosition){
-            sliderTarget = extentionLength;
+            sliderTarget = extensionLength;
             if(/*position*/ 0 < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
                 transferArm.setPower(transferArmPower); //maybe swap the sign
             }
@@ -286,6 +356,8 @@ public class TempestTeleOp extends OpMode
             //transferRotation.setPosition(transferRotationRestPosition); //should be resting position /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }
     }
+
+    //FUNCTIONS
     void sliderAutoSafetyKillswitch(int leftSliderPosition, int rightSliderPosition, int syncKillswitchThreshold) //Kill power to both sliders to prevent the arm from ripping itself apart
     {
         if (Math.abs(Math.abs(leftSliderPosition)-Math.abs(rightSliderPosition)) < syncKillswitchThreshold)
@@ -297,7 +369,7 @@ public class TempestTeleOp extends OpMode
 
     void autoBackdropOrientation(double leftDistanceSensor, double rightDistanceSensor, double rotationSensitivity)
     {
-      double orientationError = getOrientationError(/*left sensor*/, /*right sensor*/)
+      //double orientationError = getOrientationError(/*left sensor*/, /*right sensor*/);
       double leftWheels = 0;
       double rightWheels = 0;
 
@@ -310,6 +382,51 @@ public class TempestTeleOp extends OpMode
         return leftDistanceSensor - rightDistanceSensor;
     }
 
+    void sensor1PixelDetection()
+    {
+        if(sensorDistance1.getDistance(DistanceUnit.CM) < 4 && sensorColor1.blue() > ((sensorColor1.red() + sensorColor1.green()) / 2))
+        {
+            DetectedColor = PixelColor.PixelColors.PURPLE;
+            telemetry.addData("Pixel 1 Color", DetectedColor);
+        }
+        else if(sensorDistance1.getDistance(DistanceUnit.CM) < 4 && sensorColor1.green() > sensorColor1.red() && sensorColor1.red() > sensorColor1.blue())
+        {
+            DetectedColor = PixelColor.PixelColors.YELLOW;
+            telemetry.addData("Pixel 1 Color", DetectedColor);
+        }
+        else if(sensorDistance1.getDistance(DistanceUnit.CM) < 4 && sensorColor1.green() > ((sensorColor1.red() + sensorColor1.blue()) / 2))
+        {
+            DetectedColor = PixelColor.PixelColors.GREEN;
+            telemetry.addData("Pixel 1 Color", DetectedColor);
+        }
+        else if(sensorDistance1.getDistance(DistanceUnit.CM) >= 4)
+        {
+            telemetry.addData("Pixel 1 Color", "NONE");
+        }
+    }
+
+    void sensor2PixelDetection()
+    {
+        if(sensorDistance2.getDistance(DistanceUnit.CM) < 4 && sensorColor2.blue() > ((sensorColor2.red() + sensorColor2.green()) / 2))
+        {
+            DetectedColor = PixelColor.PixelColors.PURPLE;
+            telemetry.addData("Pixel 2 Color", DetectedColor);
+        }
+        else if(sensorDistance2.getDistance(DistanceUnit.CM) < 4 && sensorColor2.green() > sensorColor2.red() && sensorColor2.red() > sensorColor2.blue())
+        {
+            DetectedColor = PixelColor.PixelColors.YELLOW;
+            telemetry.addData("Pixel 2 Color", DetectedColor);
+        }
+        else if(sensorDistance2.getDistance(DistanceUnit.CM) < 4 && sensorColor2.green() > ((sensorColor2.red() + sensorColor2.blue()) / 2))
+        {
+            DetectedColor = PixelColor.PixelColors.GREEN;
+            telemetry.addData("Pixel 2 Color", DetectedColor);
+        }
+        else if(sensorDistance2.getDistance(DistanceUnit.CM) >= 4)
+        {
+            telemetry.addData("Pixel 2 Color", "NONE");
+        }
+    }
 
 
 
