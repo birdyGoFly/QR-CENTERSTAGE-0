@@ -46,7 +46,7 @@ public class TempestTeleOp extends OpMode
 //
     private CRServo transferWheel = null;
     private Servo transferRotation = null;
-    private CRServo transferArm = null;
+    private Servo transferArm = null;
     private Servo transferDoor = null;
     private Servo leftFlipoutIntakeServo = null;
     private Servo rightFlipoutIntakeServo = null;
@@ -146,7 +146,7 @@ public class TempestTeleOp extends OpMode
         //TRANSFER & ARM Servos
         transferWheel = hardwareMap.get(CRServo.class, "transfer wheel"); //The wheel for taking pixels from the intake and holding them for placement on the backdrop
         transferRotation = hardwareMap.get(Servo.class, "transfer rotation");//This is essentially the "wrist" of the robot and it is controls the orientation of the transfer
-        transferArm = hardwareMap.get(CRServo.class, "arm rotation"); //This is the rotation for the arm holding the transfer, essentially the "elbow" or "shoulder" of the robot
+        transferArm = hardwareMap.get(Servo.class, "arm rotation"); //This is the rotation for the arm holding the transfer, essentially the "elbow" or "shoulder" of the robot
         transferDoor = hardwareMap.get(Servo.class, "door"); //The door is for dropping pixels out of the transfer
 
         //Get a reference to the color sensor.
@@ -345,13 +345,13 @@ public class TempestTeleOp extends OpMode
         if(armToBoardPosition){
             sliderTarget = extensionLength;
             if(/*position*/ 0 < transferArmBoardTarget) {/*CRSERVO STUFF TO FIX*/
-                transferArm.setPower(transferArmPower); //maybe swap the sign
+                transferArm.setPosition(transferArmRestTarget); //maybe swap the sign
             }
             //transferRotation.setPosition(transferRotationDepositPosition); /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }else{
             sliderTarget = sliderRest;
             if(/*position > transferArmRestTarget*/0<transferArmRestTarget) {/*CRSERVO STUFF TO FIX*/
-                transferArm.setPower(-transferArmPower); //maybe swap the sign
+                transferArm.setPosition(transferArmRestTarget);
             }
             //transferRotation.setPosition(transferRotationRestPosition); //should be resting position /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }
