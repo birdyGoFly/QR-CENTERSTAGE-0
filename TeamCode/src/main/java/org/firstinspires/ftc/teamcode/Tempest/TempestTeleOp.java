@@ -356,7 +356,7 @@ public class TempestTeleOp extends OpMode
             //transferRotation.setPosition(transferRotationRestPosition); //should be resting position /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }
     }
-
+//
     //FUNCTIONS
     void sliderAutoSafetyKillswitch(int leftSliderPosition, int rightSliderPosition, int syncKillswitchThreshold) //Kill power to both sliders to prevent the arm from ripping itself apart
     {
