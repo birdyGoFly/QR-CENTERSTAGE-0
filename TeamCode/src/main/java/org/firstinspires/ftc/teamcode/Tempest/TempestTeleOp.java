@@ -80,7 +80,7 @@ public class TempestTeleOp extends OpMode
     final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
     //----------------------------------------------------------------------------------------------
-
+//
     private double transferArmBoardTarget = 0.7; /*measure value*/ //Arm rotation target for pixel placement
     private double transferArmRestTarget = 0; /*measure value*/ //Arm rotation target when stowing transfer within the robot
     private double doorOpenPosition = 1;/*measure the value*/
