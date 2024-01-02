@@ -156,7 +156,7 @@ public class ServoDebug extends LinearOpMode {
 
             servo.setPosition(targetPosition / 100);
 
-//----------------------TELEMETRY-------------------------------------------------------------------
+//----------------------TELEMETRY-------------------------------------------------------------------//
             telemetry.addData(">", "Press X to increase the target position, Y to decrease it");
             telemetry.addData("Servo Target Position", targetPosition / 100);
             telemetry.addData("Adjust Increment Positive?", buttonCheck);

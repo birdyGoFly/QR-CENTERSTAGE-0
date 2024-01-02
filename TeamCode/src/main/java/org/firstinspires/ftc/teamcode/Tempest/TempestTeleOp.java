@@ -407,7 +407,7 @@ public class TempestTeleOp extends OpMode
         }
     }
 
-    //FUNCTIONS
+    //FUNCTIONS//
     void sliderAutoSafetyKillswitch(int leftSliderPosition, int rightSliderPosition, int syncKillswitchThreshold) //Kill power to both sliders to prevent the arm from ripping itself apart
     {
         if (Math.abs(Math.abs(leftSliderPosition)-Math.abs(rightSliderPosition)) > syncKillswitchThreshold)
