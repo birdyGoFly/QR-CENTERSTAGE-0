@@ -61,7 +61,7 @@ public class ServoDebug extends LinearOpMode {
     boolean rampUp = true;
 
     double targetPosition = 0.5;
-    int adjustmentIncrement = 3;
+    double adjustmentIncrement = 0.01;
 
     boolean buttonCheck = false;
     boolean buttonCheck2 = false;
@@ -101,6 +101,7 @@ public class ServoDebug extends LinearOpMode {
                 }
 
  */
+            /*
             if(gamepad1.a && !buttonCheck)
             {
                 if(!buttonCheck)
@@ -134,6 +135,20 @@ public class ServoDebug extends LinearOpMode {
             {
                 buttonCheck2 = false;
             }
+
+             */
+
+            adjustmentIncrement = 0.01 + (gamepad1.right_trigger / 10);
+
+            if(gamepad1.a)
+            {
+                targetPosition = targetPosition + adjustmentIncrement;
+            }
+            else if (gamepad1.b)
+            {
+                targetPosition = targetPosition - adjustmentIncrement;
+            }
+
 
 
 

@@ -77,12 +77,16 @@ public class TempestTeleOp extends OpMode
 //
     private double transferArmBoardTarget = 0.7; /*measure value*/ //Arm rotation target for pixel placement
     private double transferArmRestTarget = 0; /*measure value*/ //Arm rotation target when stowing transfer within the robot
+    private double transferArmRotationTarget = 0;
+    private double transferArmRotationSpeed = 0.02;
     private double doorOpenPosition = 1;/*measure the value*/
     private double doorClosedPosition = 0;/*change this*//*assuming that this is the starting position*/
     private double transferArmPower = 1;
     private double transferRotationDepositPosition = 0.435;/*measure the value*/
     private double transferRotationRestPosition = 0;/*change this to 0.965 if you want it to be angled *//*assuming that this is the starting position*/
     private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the intake position*/
+    private double transferRotationTarget = 0;
+    private double transferRotationSpeed = 0.01;
     private double rightStoredIntakePosition = 0.435; /*this is when the right flipout intake is retracted*/
     private double leftStoredIntakePosition = 0.605; /*this is when the left flipout intake is retracted*/
     private double rightIntakePosition = 0.15; /*this is when the right flipout intake is deployed*/
@@ -112,6 +116,7 @@ public class TempestTeleOp extends OpMode
     int synchronizationKillswitchThreshold = 60;
     boolean autoKillswitchEnabled = false;
     double orientationAdjustmentSensitivity = 0.25; //TODO: TUNE THIS VALUE
+    double armPosition = 0;
 
 
     @Override
@@ -155,13 +160,7 @@ public class TempestTeleOp extends OpMode
 
 
  */
-        //get our analog input from the hardwareMap
-        //AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "transferArm");
 
-        // get the voltage of our analog line
-        // divide by 3.3 (the max voltage) to get a value between 0 and 1
-        // multiply by 360 to convert it to 0 to 360 degrees
-        //double position = analogInput.getVoltage() / 3.3 * 360;
 
         //-------------------------------------------------
 
@@ -206,7 +205,18 @@ public class TempestTeleOp extends OpMode
         telemetry.addData("Right Slider Velocity", rightSliderExtension.getVelocity());
         telemetry.addData("Slider Synchronization Error", Math.abs(Math.abs(leftSliderExtension.getCurrentPosition())-Math.abs(rightSliderExtension.getCurrentPosition())));
         telemetry.addData("Slider Killswitch Enabled", autoKillswitchEnabled);
+        telemetry.addData("Arm Encoder Rotation", armPosition);
+        telemetry.addData("Transfer Arm Rotation Target", transferArmRotationTarget);
+        telemetry.addData("Transfer Rotation Target", transferRotationTarget);
         telemetry.update();
+
+        //get our analog input from the hardwareMap
+        AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "transferArm");
+
+        // get the voltage of our analog line
+        // divide by 3.3 (the max voltage) to get a value between 0 and 1
+        // multiply by 360 to convert it to 0 to 360 degrees
+        double armPosition = analogInput.getVoltage() / 3.3 * 360;
 
         /* This sets the power to vary depending on the error. Does not work as of 12/24/23 (happy holidays)*/
 
@@ -215,6 +225,18 @@ public class TempestTeleOp extends OpMode
 
         //leftSliderExtension.setPower(power1);
         //rightSliderExtension.setPower(power2);
+
+        transferArm.setPosition(transferArmRotationTarget);
+        transferRotation.setPosition(transferRotationTarget);
+
+        if (transferArmRotationTarget < 0)
+        {
+            transferArmRotationTarget = 0;
+        }
+        if (transferRotationTarget < 0)
+        {
+            transferRotationTarget = 0;
+        }
 
         leftSliderExtension.setTargetPosition(sliderTarget);
         rightSliderExtension.setTargetPosition(sliderTarget);
@@ -285,20 +307,20 @@ public class TempestTeleOp extends OpMode
                 }else if(gamepad1.y){ //If Y is pressed the robot will spit out pixels as well as pixels already stored in the transfer wheel, by rotating both the wheel and intake in reverse
                     intakeMotor.setPower(-intakeMotorPower); //Spin the intake in reverse
                     transferWheel.setPower(-transferWheelTurnPower); //Turns the transfer wheel in reverse to spit out pixels
-                    transferRotation.setPosition(transferRotationRestPosition);
+                    //(transferRotationRestPosition);
                 }else if(gamepad1.a) { //if A is pressed  A will intake pixels
                     leftFlipoutIntakeServo.setPosition(rightIntakePosition); //Unfold the left side of the intake
                     rightFlipoutIntakeServo.setPosition(leftIntakePosition); //Unfold the right side of the intake
                     intakeMotor.setPower(intakeMotorPower); //turn the intakes
                     intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     transferWheel.setPower(transferWheelTurnPower); // turns the transfer wheel
-                    transferRotation.setPosition(transferRotationIntakePosition);
+                    //transferRotation.setPosition(transferRotationIntakePosition);
                 }else{
                     leftFlipoutIntakeServo.setPosition(rightStoredIntakePosition); //store the intakes
                     rightFlipoutIntakeServo.setPosition(leftStoredIntakePosition); //store the intakes
                     intakeMotor.setPower(0); //Stop turning the intake motor
                     transferWheel.setPower(0); //Keeps the transfer wheel from turning when nothing is pressed
-                    transferRotation.setPosition(transferRotationIntakePosition);
+                    //transferRotation.setPosition(transferRotationIntakePosition);
                     if (gamepad1.b && !BHasBeenPressed) { //if nothing else was pressed, check if b was pressed to switch modes
                         BHasBeenPressed = true;
                         armToBoardPosition = true; //puts the sliders, arm, and transferRotation to the right position
@@ -348,14 +370,40 @@ public class TempestTeleOp extends OpMode
         //Runs the sliders, arm, and transferRotation to the right position for pixel placement
         if(armToBoardPosition){
             sliderTarget = extensionLength;
-            transferArm.setPosition(transferArmBoardTarget);
-            transferRotation.setPosition(transferRotationDepositPosition); /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
+            //transferRotation.setPosition(transferRotationDepositPosition); /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
+            if (transferArmRotationTarget <= 0.4)
+            {
+                transferArmRotationTarget += transferArmRotationSpeed * 2;
+            }
+            else if (transferArmRotationTarget > 0.04 && transferArmRotationTarget < transferArmBoardTarget)
+            {
+                transferArmRotationTarget += transferArmRotationSpeed;
+            }
+            if (transferRotationTarget < transferRotationDepositPosition && transferArmRotationTarget <= transferArmBoardTarget)
+            {
+                transferRotationTarget += transferRotationSpeed * (transferArmRotationTarget * 4);
+            }
+            else if (transferArmRotationTarget >= transferArmBoardTarget)
+            {
+                transferRotationTarget = transferRotationDepositPosition;
+            }
+
         }
         else
         {
             sliderTarget = sliderRest;
-            transferArm.setPosition(transferArmRestTarget);
-            //transferRotation.setPosition(transferRotationRestPosition); //should be resting position /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
+            if (transferArmRotationTarget > 0.5)
+            {
+                transferArmRotationTarget -= transferArmRotationSpeed * 3;
+            }
+            else if (transferArmRotationTarget <= 0.5 && transferArmRotationTarget > transferArmRestTarget)
+            {
+                transferArmRotationTarget -= transferArmRotationSpeed;
+            }
+            if (transferRotationTarget > transferRotationRestPosition)
+            {
+                transferRotationTarget -= transferRotationSpeed * 4;
+            }
         }
     }
 
