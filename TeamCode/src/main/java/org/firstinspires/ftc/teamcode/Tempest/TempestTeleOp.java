@@ -73,12 +73,6 @@ public class TempestTeleOp extends OpMode
     // to amplify/attentuate the measured values.
     final double SCALE_FACTOR = 255;
     PixelColor.PixelColors DetectedColor;
-
-    //Get a reference to the RelativeLayout so we can change the background
-    //color of the Robot Controller app to match the hue detected by the RGB sensor.
-    int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
-    final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
-
     //----------------------------------------------------------------------------------------------
 //
     private double transferArmBoardTarget = 0.7; /*measure value*/ //Arm rotation target for pixel placement
@@ -86,8 +80,8 @@ public class TempestTeleOp extends OpMode
     private double doorOpenPosition = 1;/*measure the value*/
     private double doorClosedPosition = 0;/*change this*//*assuming that this is the starting position*/
     private double transferArmPower = 1;
-    private double transferRotationDepositPosition = 0.125;/*measure the value*/
-    private double transferRotationRestPosition = 0.925;/*change this*//*assuming that this is the starting position*/
+    private double transferRotationDepositPosition = 0.435;/*measure the value*/
+    private double transferRotationRestPosition = 0;/*change this to 0.965 if you want it to be angled *//*assuming that this is the starting position*/
     private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the intake position*/
     private double rightStoredIntakePosition = 0.435; /*this is when the right flipout intake is retracted*/
     private double leftStoredIntakePosition = 0.605; /*this is when the left flipout intake is retracted*/
@@ -115,7 +109,8 @@ public class TempestTeleOp extends OpMode
     double Kp1 = 1;
     double Kp2 = 2;
 
-    int synchronizationKillswitchThreshold = 150; //TODO: SET THIS VALUE TO THE MAXIMUM ERROR OF SYNCHRONIZATION THE SLIDERS CAN HAVE BEFORE THEY RISK DAMAGING THE ROBOT
+    int synchronizationKillswitchThreshold = 60;
+    boolean autoKillswitchEnabled = false;
     double orientationAdjustmentSensitivity = 0.25; //TODO: TUNE THIS VALUE
 
 
@@ -148,7 +143,7 @@ public class TempestTeleOp extends OpMode
         transferRotation = hardwareMap.get(Servo.class, "transfer rotation");//This is essentially the "wrist" of the robot and it is controls the orientation of the transfer
         transferArm = hardwareMap.get(Servo.class, "arm rotation"); //This is the rotation for the arm holding the transfer, essentially the "elbow" or "shoulder" of the robot
         transferDoor = hardwareMap.get(Servo.class, "door"); //The door is for dropping pixels out of the transfer
-
+/*
         //Get a reference to the color sensor.
         sensorColor1 = hardwareMap.get(ColorSensor.class, "Transfer Color Sensor 1");
         //Get a reference to the distance sensor that shares the same name.
@@ -158,13 +153,15 @@ public class TempestTeleOp extends OpMode
         //Get a reference to the other distance sensor that shares the same name.
         sensorDistance2 = hardwareMap.get(DistanceSensor.class, "Transfer Color Sensor 2");
 
+
+ */
         //get our analog input from the hardwareMap
-        AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "transferArm");
+        //AnalogInput analogInput = hardwareMap.get(AnalogInput.class, "transferArm");
 
         // get the voltage of our analog line
         // divide by 3.3 (the max voltage) to get a value between 0 and 1
         // multiply by 360 to convert it to 0 to 360 degrees
-        double position = analogInput.getVoltage() / 3.3 * 360;
+        //double position = analogInput.getVoltage() / 3.3 * 360;
 
         //-------------------------------------------------
 
@@ -208,6 +205,7 @@ public class TempestTeleOp extends OpMode
         telemetry.addData("Left Slider Velocity", leftSliderExtension.getVelocity());
         telemetry.addData("Right Slider Velocity", rightSliderExtension.getVelocity());
         telemetry.addData("Slider Synchronization Error", Math.abs(Math.abs(leftSliderExtension.getCurrentPosition())-Math.abs(rightSliderExtension.getCurrentPosition())));
+        telemetry.addData("Slider Killswitch Enabled", autoKillswitchEnabled);
         telemetry.update();
 
         /* This sets the power to vary depending on the error. Does not work as of 12/24/23 (happy holidays)*/
@@ -221,8 +219,8 @@ public class TempestTeleOp extends OpMode
         leftSliderExtension.setTargetPosition(sliderTarget);
         rightSliderExtension.setTargetPosition(sliderTarget);
 
-        leftSliderExtension.setPower(1);
-        rightSliderExtension.setPower(1);
+        leftSliderExtension.setPower(extensionPower);
+        rightSliderExtension.setPower(extensionPower);
 
         sliderAutoSafetyKillswitch(leftSliderExtension.getCurrentPosition(), rightSliderExtension.getCurrentPosition(), synchronizationKillswitchThreshold);
 
@@ -230,6 +228,7 @@ public class TempestTeleOp extends OpMode
         // multiply by the SCALE_FACTOR.
         // then cast it back to int (SCALE_FACTOR is a double)
         //This is for sensor 1
+        /*
         Color.RGBToHSV((int) (sensorColor1.red() * SCALE_FACTOR),
                 (int) (sensorColor1.green() * SCALE_FACTOR),
                 (int) (sensorColor1.blue() * SCALE_FACTOR),
@@ -243,15 +242,20 @@ public class TempestTeleOp extends OpMode
         sensor1PixelDetection();
         sensor2PixelDetection();
 
+
+         */
         // change the background color to match the color detected by the RGB sensor.
         // pass a reference to the hue, saturation, and value array as an argument
         // to the HSVToColor method.
+        /*
         relativeLayout.post(new Runnable() {
             public void run() {
                 relativeLayout.setBackgroundColor(Color.HSVToColor(0xff, values));
             }
         });
 
+
+         */
 
         switch (activeRobotMode) {
             case drivingPosition:
@@ -344,8 +348,8 @@ public class TempestTeleOp extends OpMode
         //Runs the sliders, arm, and transferRotation to the right position for pixel placement
         if(armToBoardPosition){
             sliderTarget = extensionLength;
-            transferArm.setPosition(transferArmRestTarget);
-            //transferRotation.setPosition(transferRotationDepositPosition); /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
+            transferArm.setPosition(transferArmBoardTarget);
+            transferRotation.setPosition(transferRotationDepositPosition); /*COMMENTED OUT FOR DEBUGGING, very jittery, assumed to be related to conflicting commands*/
         }
         else
         {
@@ -358,10 +362,16 @@ public class TempestTeleOp extends OpMode
     //FUNCTIONS
     void sliderAutoSafetyKillswitch(int leftSliderPosition, int rightSliderPosition, int syncKillswitchThreshold) //Kill power to both sliders to prevent the arm from ripping itself apart
     {
-        if (Math.abs(Math.abs(leftSliderPosition)-Math.abs(rightSliderPosition)) < syncKillswitchThreshold)
+        if (Math.abs(Math.abs(leftSliderPosition)-Math.abs(rightSliderPosition)) > syncKillswitchThreshold)
         {
             leftSliderExtension.setMotorDisable();
             rightSliderExtension.setMotorDisable();
+            boolean autoKillswitchEnabled = true;
+        }
+        if (autoKillswitchEnabled = true && gamepad1.right_bumper)
+        {
+            leftSliderExtension.setMotorEnable();
+            rightSliderExtension.setMotorEnable();
         }
     }
 
@@ -425,9 +435,4 @@ public class TempestTeleOp extends OpMode
             telemetry.addData("Pixel 2 Color", "NONE");
         }
     }
-
-
-
-
-
 }
