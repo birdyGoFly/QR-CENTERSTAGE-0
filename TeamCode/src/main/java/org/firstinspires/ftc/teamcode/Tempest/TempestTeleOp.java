@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs;
 import org.firstinspires.ftc.teamcode.utildata.PixelColor;
+import org.firstinspires.ftc.teamcode.Tempest.utility.IntakeController;
 
 
 @TeleOp(name="Tempest TeleOp", group="Iterative OpMode")
@@ -74,7 +75,7 @@ public class TempestTeleOp extends OpMode
     final double SCALE_FACTOR = 255;
     PixelColor.PixelColors DetectedColor;
     //----------------------------------------------------------------------------------------------
-//
+    private IntakeController intakeController = new IntakeController();
     private double transferArmBoardTarget = 0.7; /*measure value*/ //Arm rotation target for pixel placement
     private double transferArmRestTarget = 0; /*measure value*/ //Arm rotation target when stowing transfer within the robot
     private double transferArmRotationTarget = 0;
@@ -309,8 +310,7 @@ public class TempestTeleOp extends OpMode
                     transferWheel.setPower(-transferWheelTurnPower); //Turns the transfer wheel in reverse to spit out pixels
                     //(transferRotationRestPosition);
                 }else if(gamepad1.a) { //if A is pressed  A will intake pixels
-                    leftFlipoutIntakeServo.setPosition(rightIntakePosition); //Unfold the left side of the intake
-                    rightFlipoutIntakeServo.setPosition(leftIntakePosition); //Unfold the right side of the intake
+                    setIntakePosition(100); //Unfold the intake
                     intakeMotor.setPower(intakeMotorPower); //turn the intakes
                     intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     transferWheel.setPower(transferWheelTurnPower); // turns the transfer wheel
@@ -408,6 +408,11 @@ public class TempestTeleOp extends OpMode
     }
 
     //FUNCTIONS//
+
+    public void setIntakePosition(double percentage)
+    {
+        intakeController.setIntakePosition(percentage);
+    }
     void sliderAutoSafetyKillswitch(int leftSliderPosition, int rightSliderPosition, int syncKillswitchThreshold) //Kill power to both sliders to prevent the arm from ripping itself apart
     {
         if (Math.abs(Math.abs(leftSliderPosition)-Math.abs(rightSliderPosition)) > syncKillswitchThreshold)
