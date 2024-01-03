@@ -417,7 +417,7 @@ public class TempestTeleOp extends OpMode
             else if (transferArmRotationTarget >= transferArmBoardTarget)
             {
                 transferRotationTarget = transferRotationDepositPosition;
-            }
+            }//
 
         }
         else
