@@ -12,8 +12,8 @@ public class IntakeController {
         percentage = Math.max(0, Math.min(100,percentage));
 
         //Set servo positions
-        rightIntakeServo.setPosition(rightStoredIntakePosition + (rightIntakePosition - rightStoredIntakePosition) * (percentage / 100));
-        leftIntakeServo.setPosition(leftStoredIntakePosition + (leftIntakePosition - leftStoredIntakePosition) * (percentage / 100));
+        //rightIntakeServo.setPosition(rightStoredIntakePosition + (rightIntakePosition - rightStoredIntakePosition) * (percentage / 100));
+        //leftIntakeServo.setPosition(leftStoredIntakePosition + (leftIntakePosition - leftStoredIntakePosition) * (percentage / 100));
     }
     /*
     public static void main (String[] args)

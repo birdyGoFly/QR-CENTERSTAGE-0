@@ -23,7 +23,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs;
 import org.firstinspires.ftc.teamcode.utildata.PixelColor;
-import org.firstinspires.ftc.teamcode.Tempest.utility.IntakeController;
+//import org.firstinspires.ftc.teamcode.Tempest.utility.IntakeController;
 
 
 @TeleOp(name="Tempest TeleOp", group="Iterative OpMode")
@@ -75,7 +75,9 @@ public class TempestTeleOp extends OpMode
     final double SCALE_FACTOR = 255;
     PixelColor.PixelColors DetectedColor;
     //----------------------------------------------------------------------------------------------
-    private IntakeController intakeController = new IntakeController();
+    //private IntakeController intakeController = new IntakeController();
+    private double intakeTargetPosition = 0;
+    private int intakeMaxPosition = 100;
     private double transferArmBoardTarget = 0.7; /*measure value*/ //Arm rotation target for pixel placement
     private double transferArmRestTarget = 0; /*measure value*/ //Arm rotation target when stowing transfer within the robot
     private double transferArmRotationTarget = 0;
@@ -301,6 +303,34 @@ public class TempestTeleOp extends OpMode
                 frontRight.setPower(frontRightPower);
                 backRight.setPower(backRightPower);
 
+/*
+                setIntakePosition(intakeTargetPosition);
+
+                if(intakeTargetPosition < 0)
+                {
+                    intakeTargetPosition = 0;
+                }
+                else if(intakeTargetPosition > 100)
+                {
+                    intakeTargetPosition = 100;
+                }
+
+                if(gamepad1.dpad_up)
+                {
+                    intakeTargetPosition += 0.001;
+                }
+                else if(gamepad1.dpad_down)
+                {
+                    intakeTargetPosition -= 0.001;
+                }
+
+                if(gamepad1.dpad_right)
+                {
+                    intakeTargetPosition = 0;
+                }
+
+ */
+
                 ///////////////////////////////////////////////////////////////////////////////////////////
                 // FLOOR-MODE TRANSFER CONTROL | Exclusively use this mode if there are arm issues and you need to be a pushbot
                 if(gamepad1.x) { //If X is pressed the intake will spit out pixels (spin in reverse). The transfer wheel will not spin
@@ -310,7 +340,8 @@ public class TempestTeleOp extends OpMode
                     transferWheel.setPower(-transferWheelTurnPower); //Turns the transfer wheel in reverse to spit out pixels
                     //(transferRotationRestPosition);
                 }else if(gamepad1.a) { //if A is pressed  A will intake pixels
-                    setIntakePosition(100); //Unfold the intake
+                    leftFlipoutIntakeServo.setPosition(rightIntakePosition); //store the intakes
+                    rightFlipoutIntakeServo.setPosition(leftIntakePosition); //store the intakes
                     intakeMotor.setPower(intakeMotorPower); //turn the intakes
                     intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     transferWheel.setPower(transferWheelTurnPower); // turns the transfer wheel
@@ -375,9 +406,9 @@ public class TempestTeleOp extends OpMode
             {
                 transferArmRotationTarget += transferArmRotationSpeed * 2;
             }
-            else if (transferArmRotationTarget > 0.04 && transferArmRotationTarget < transferArmBoardTarget)
+            else if (transferArmRotationTarget > 0.4 && transferArmRotationTarget < transferArmBoardTarget)
             {
-                transferArmRotationTarget += transferArmRotationSpeed;
+                transferArmRotationTarget += transferArmRotationSpeed * 0.75;
             }
             if (transferRotationTarget < transferRotationDepositPosition && transferArmRotationTarget <= transferArmBoardTarget)
             {
@@ -408,11 +439,22 @@ public class TempestTeleOp extends OpMode
     }
 
     //FUNCTIONS//
-
+/*
     public void setIntakePosition(double percentage)
     {
-        intakeController.setIntakePosition(percentage);
+        //Make sure percentage is within the valid range
+        percentage = Math.max(0, Math.min(100,percentage));
+
+        //Set servo positions
+        rightFlipoutIntakeServo.setPosition(rightStoredIntakePosition + (rightIntakePosition - rightStoredIntakePosition) * (percentage / 100));
+        leftFlipoutIntakeServo.setPosition(leftStoredIntakePosition + (leftIntakePosition - leftStoredIntakePosition) * (percentage / 100));
+
+        telemetry.addData("Right Intake Target", (rightStoredIntakePosition + (rightIntakePosition - rightStoredIntakePosition) * (percentage / 100)));
+        telemetry.addData("Left Intake Target", (leftStoredIntakePosition + (leftIntakePosition - leftStoredIntakePosition) * (percentage / 100)));
+
+        telemetry.addData("Servo Target", intakeTargetPosition);
     }
+    */
     void sliderAutoSafetyKillswitch(int leftSliderPosition, int rightSliderPosition, int syncKillswitchThreshold) //Kill power to both sliders to prevent the arm from ripping itself apart
     {
         if (Math.abs(Math.abs(leftSliderPosition)-Math.abs(rightSliderPosition)) > syncKillswitchThreshold)
