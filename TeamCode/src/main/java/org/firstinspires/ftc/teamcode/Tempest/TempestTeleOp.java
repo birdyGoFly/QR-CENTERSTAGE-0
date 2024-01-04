@@ -4,10 +4,6 @@ package org.firstinspires.ftc.teamcode.Tempest;
 import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.boardPosition;
 import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.drivingPosition;
 
-import android.app.Activity;
-import android.graphics.Color;
-import android.view.View;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -82,24 +78,24 @@ public class TempestTeleOp extends OpMode
     private double transferArmRestTarget = 0; /*measure value*/ //Arm rotation target when stowing transfer within the robot
     private double transferArmRotationTarget = 0;
     private double transferArmRotationSpeed = 0.02;
-    private double doorOpenPosition = 1;/*measure the value*/
-    private double doorClosedPosition = 0;/*change this*//*assuming that this is the starting position*/
+    private double doorOpenPosition = 0.2;/*measure the value*/
+    private double doorClosedPosition = 0.42;/*change this*//*assuming that this is the starting position*/
     private double transferArmPower = 1;
     private double transferRotationDepositPosition = 0.435;/*measure the value*/
     private double transferRotationRestPosition = 0;/*change this to 0.965 if you want it to be angled *//*assuming that this is the starting position*/
     private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the intake position*/
     private double transferRotationTarget = 0;
     private double transferRotationSpeed = 0.01;
-    private double rightStoredIntakePosition = 0.435; /*this is when the right flipout intake is retracted*/
-    private double leftStoredIntakePosition = 0.605; /*this is when the left flipout intake is retracted*/
-    private double rightIntakePosition = 0.15; /*this is when the right flipout intake is deployed*/
-    private double leftIntakePosition = 0.87; /*this is when the left flipout intake is deployed*/
+    private double rightIntakeMIN = 0.435; /*this is when the right flipout intake is retracted*/
+    private double leftIntakeMIN = 0.605; /*this is when the left flipout intake is retracted*/
+    private double rightIntakeMAX = 0.15; /*this is when the right flipout intake is deployed*/
+    private double leftIntakeMAX = 0.87; /*this is when the left flipout intake is deployed*/
 
 
     //MOTOR POSITION VARIABLES
     private int extensionLength = 1000 /*change this value probably*/;
     private double extensionPower = 1;
-    private int extensionChange = 1; // how much a bumper trigger increases or decreases the extention length
+    private int extensionChange = 25; // how much a bumper trigger increases or decreases the extention length
     private int sliderRest = 0; /* this is the retracted position. Maybe change*/
     private int intakeMotorPower = 1;
 
@@ -120,6 +116,10 @@ public class TempestTeleOp extends OpMode
     boolean autoKillswitchEnabled = false;
     double orientationAdjustmentSensitivity = 0.25; //TODO: TUNE THIS VALUE
     double armPosition = 0;
+    int motorDirection = 1;
+    boolean buttonCheck = false;
+    double intakeTargetPercentage = 0;
+    double powerMultiplier = 1;
 
 
     @Override
@@ -249,6 +249,37 @@ public class TempestTeleOp extends OpMode
 
         sliderAutoSafetyKillswitch(leftSliderExtension.getCurrentPosition(), rightSliderExtension.getCurrentPosition(), synchronizationKillswitchThreshold);
 
+        if(intakeTargetPercentage < 0)
+        {
+            intakeTargetPercentage = 0;
+        }
+        else if(intakeTargetPercentage > 100)
+        {
+            intakeTargetPercentage = 100;
+        }
+
+        if(gamepad1.dpad_up)
+        {
+            intakeTargetPercentage += 1;
+        }
+        else if(gamepad1.dpad_down)
+        {
+            intakeTargetPercentage -= 1;
+        }
+
+        if(gamepad1.dpad_right)
+        {
+            intakeTargetPercentage = 0;
+        }
+
+        //intakePercentageTarget(intakeTargetPercentage);
+
+        rightFlipoutIntakeServo.setPosition(((0.87-0.605)*(intakeTargetPercentage/100))+0.605);
+        leftFlipoutIntakeServo.setPosition(((0.15-0.435)*(intakeTargetPercentage/100))+0.435);
+        telemetry.addData("target", ((0.15-0.435)*(intakeTargetPercentage/100))+0.435);
+
+
+
         // convert the RGB values to HSV values.
         // multiply by the SCALE_FACTOR.
         // then cast it back to int (SCALE_FACTOR is a double)
@@ -282,9 +313,43 @@ public class TempestTeleOp extends OpMode
 
          */
 
+        /*DRIVING CODE COPIED FROM MEET 2*/// -------------------------------------------------------
+        double y = (-gamepad1.right_stick_y * motorDirection) * powerMultiplier;
+        double x = ((gamepad1.right_stick_x * 1.1) * motorDirection) * powerMultiplier; // The multiplier is to counteract imperfect strafing.
+        double rx = (gamepad1.left_stick_x) * powerMultiplier;
+
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio,
+        // but only if at least one is out of the range [-1, 1]
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double frontLeftPower = (y + x + rx) / denominator;
+        double backLeftPower = (y - x + rx) / denominator;
+        double frontRightPower = (y - x - rx) / denominator;
+        double backRightPower = (y + x - rx) / denominator;
+
+        frontLeft.setPower(frontLeftPower);
+        backLeft.setPower(backLeftPower);
+        frontRight.setPower(frontRightPower);
+        backRight.setPower(backRightPower);
+
+        if (gamepad1.dpad_left && !buttonCheck)
+        {
+            buttonCheck = true;
+        }
+
+        if (!gamepad1.dpad_left && buttonCheck)
+        {
+            buttonCheck = false;
+            motorDirection *= -1;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
         switch (activeRobotMode) {
             case drivingPosition:
+                powerMultiplier = 1;
                 /*DRIVING CODE COPIED FROM MEET 2*/// -------------------------------------------------------
+                /*
                 double y = -gamepad1.right_stick_y;
                 double x = gamepad1.right_stick_x * 1.1; // The multiplier is to counteract imperfect strafing.
                 double rx = gamepad1.left_stick_x;
@@ -302,6 +367,8 @@ public class TempestTeleOp extends OpMode
                 backLeft.setPower(backLeftPower);
                 frontRight.setPower(frontRightPower);
                 backRight.setPower(backRightPower);
+
+                 */
 
 /*
                 setIntakePosition(intakeTargetPosition);
@@ -331,6 +398,7 @@ public class TempestTeleOp extends OpMode
 
  */
 
+
                 ///////////////////////////////////////////////////////////////////////////////////////////
                 // FLOOR-MODE TRANSFER CONTROL | Exclusively use this mode if there are arm issues and you need to be a pushbot
                 if(gamepad1.x) { //If X is pressed the intake will spit out pixels (spin in reverse). The transfer wheel will not spin
@@ -340,15 +408,13 @@ public class TempestTeleOp extends OpMode
                     transferWheel.setPower(-transferWheelTurnPower); //Turns the transfer wheel in reverse to spit out pixels
                     //(transferRotationRestPosition);
                 }else if(gamepad1.a) { //if A is pressed  A will intake pixels
-                    leftFlipoutIntakeServo.setPosition(rightIntakePosition); //store the intakes
-                    rightFlipoutIntakeServo.setPosition(leftIntakePosition); //store the intakes
+                    intakeTargetPercentage = 100; //deploy the intakes
                     intakeMotor.setPower(intakeMotorPower); //turn the intakes
                     intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                     transferWheel.setPower(transferWheelTurnPower); // turns the transfer wheel
                     //transferRotation.setPosition(transferRotationIntakePosition);
                 }else{
-                    leftFlipoutIntakeServo.setPosition(rightStoredIntakePosition); //store the intakes
-                    rightFlipoutIntakeServo.setPosition(leftStoredIntakePosition); //store the intakes
+                    intakeTargetPercentage = 0; //store the intakes
                     intakeMotor.setPower(0); //Stop turning the intake motor
                     transferWheel.setPower(0); //Keeps the transfer wheel from turning when nothing is pressed
                     //transferRotation.setPosition(transferRotationIntakePosition);
@@ -365,6 +431,7 @@ public class TempestTeleOp extends OpMode
                 //----------------------------------------------------------------------------------
                 //This is only for when the robot is in board (or placement) position ----------
             case boardPosition:
+                powerMultiplier = 0.5;
                 if(gamepad1.a){ //Check if A is pressed for placing 1st and 2nd pixel
                     isAPressed = true; //Register that A has been pressed
                     if(numAPress == 0){
@@ -381,10 +448,11 @@ public class TempestTeleOp extends OpMode
                 }else if(gamepad1.right_bumper){ //if A is not pressed then checks if the bumpers are pressed
                     extensionLength += extensionChange;
                 } else if (gamepad1.left_bumper) {
-
+                    extensionLength -= extensionChange;
                 }else { //if nothing was pressed then checks if B was pressed
                     if (gamepad1.b && !BHasBeenPressed) {
                         transferWheel.setPower(0);
+                        transferDoor.setPosition(doorClosedPosition);
                         // makes sure the transfer wheel stops
                         // turning when switching into driving mode
                         BHasBeenPressed = true;
@@ -530,4 +598,12 @@ public class TempestTeleOp extends OpMode
             telemetry.addData("Pixel 2 Color", "NONE");
         }
     }
+/*
+    void intakePercentageTarget(double targetPercentage)
+    {
+        telemetry.addData("targetPercentage", targetPercentage);
+        telemetry.addData("target", ((0.15-0.435)*(targetPercentage/100))+0.435);
+
+    }
+*/
 }
