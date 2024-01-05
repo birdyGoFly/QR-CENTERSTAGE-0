@@ -100,7 +100,7 @@ public class TempestTeleOp extends OpMode
     private int intakeMotorPower = 1;
 
     private int sliderFirstRow = 0;
-    //private double armFirstRow =
+    ////private double armFirstRow =
 
 
 
