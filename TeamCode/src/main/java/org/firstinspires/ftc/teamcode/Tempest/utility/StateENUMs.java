@@ -5,7 +5,10 @@ public class StateENUMs {
     {
         drivingPosition,
         boardPosition,
-        placementPosition,
+        placementPositionRow1,
+        placementPositionRow2,
+        placementPositionRow4,
+
         //hangPosition,
         //hangingPosition,
 

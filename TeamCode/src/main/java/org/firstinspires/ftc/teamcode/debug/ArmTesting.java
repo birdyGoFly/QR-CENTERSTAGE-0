@@ -47,7 +47,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Servo Debug", group = "Debug")
+@TeleOp(name = "Arm Debug", group = "Debug")
 public class ArmTesting extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
@@ -90,7 +90,7 @@ public class ArmTesting extends LinearOpMode {
 
             if(gamepad1.a)
             {
-                targetPosition1 = adjustmentIncrement;
+                targetPosition1 += adjustmentIncrement;
             }
             else if (gamepad1.b)
             {
@@ -112,18 +112,17 @@ public class ArmTesting extends LinearOpMode {
             adjustmentIncrement = 0.01 + (gamepad1.right_trigger / 10);
 
 //----------------------TELEMETRY-------------------------------------------------------------------//
+            // Display the current value
+            telemetry.addData("Servo 1 Position", "%5.2f", targetPosition1/100);
+            telemetry.addData("Servo 2 Position", "%5.2f", targetPosition2/100);
+            telemetry.addData(">", "Press Stop to end test." );
             telemetry.addData(">", "Press X to increase the target position, Y to decrease it");
-            telemetry.addData("Servo Target Position", targetPosition1 / 100);
             telemetry.addData("Adjust Increment Positive?", buttonCheck);
             telemetry.update();
         }
 
 ////
-        // Display the current value
-        telemetry.addData("Servo 1 Position", "%5.2f", position);
-        telemetry.addData("Servo 2 Position", "%5.2f", position);
-        telemetry.addData(">", "Press Stop to end test." );
-        telemetry.update();
+
 
         // Set the servo to the new position and pause;
         //servo.setPosition(position);
@@ -135,5 +134,8 @@ public class ArmTesting extends LinearOpMode {
     //telemetry.addData(">", "Done");
     //telemetry.update();
 }
+
+//Row 1 = 0.42, 0.8
+//Row 2 = 0.41, 0.71
 
 
