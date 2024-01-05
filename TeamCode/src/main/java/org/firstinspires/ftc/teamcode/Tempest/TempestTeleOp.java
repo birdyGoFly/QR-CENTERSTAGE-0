@@ -93,11 +93,17 @@ public class TempestTeleOp extends OpMode
 
 
     //MOTOR POSITION VARIABLES
-    private int extensionLength = 1000 /*change this value probably*/;
+    private int extensionLength = 0 /*change this value probably*/;
     private double extensionPower = 1;
     private int extensionChange = 25; // how much a bumper trigger increases or decreases the extention length
     private int sliderRest = 0; /* this is the retracted position. Maybe change*/
     private int intakeMotorPower = 1;
+
+    private int sliderFirstRow = 0;
+    private double armFirstRow =
+
+
+
 
 
     //Variables to check how many times "A" or "B" has been pressed
@@ -257,7 +263,7 @@ public class TempestTeleOp extends OpMode
         {
             intakeTargetPercentage = 100;
         }
-
+/*
         if(gamepad1.dpad_up)
         {
             intakeTargetPercentage += 1;
@@ -271,7 +277,7 @@ public class TempestTeleOp extends OpMode
         {
             intakeTargetPercentage = 0;
         }
-
+*/
         //intakePercentageTarget(intakeTargetPercentage);
 
         rightFlipoutIntakeServo.setPosition(((0.87-0.605)*(intakeTargetPercentage/100))+0.605);
