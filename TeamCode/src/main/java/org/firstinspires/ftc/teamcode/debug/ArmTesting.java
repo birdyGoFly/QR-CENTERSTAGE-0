@@ -118,7 +118,7 @@ public class ArmTesting extends LinearOpMode {
             telemetry.update();
         }
 
-
+//
         // Display the current value
         telemetry.addData("Servo 1 Position", "%5.2f", position);
         telemetry.addData("Servo 2 Position", "%5.2f", position);
