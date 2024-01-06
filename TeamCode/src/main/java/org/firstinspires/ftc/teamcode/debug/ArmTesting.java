@@ -27,13 +27,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.debug;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.CRServo;
 
 /*
  * This OpMode scans a single servo back and forward until Stop is pressed.
@@ -49,8 +47,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Concept: Scan Servo", group = "Concept")
-public class ConceptScanServo extends LinearOpMode {
+@TeleOp(name = "Arm Debug", group = "Debug")
+public class ArmTesting extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
@@ -58,12 +56,14 @@ public class ConceptScanServo extends LinearOpMode {
     static final double MIN_POS     =  0.0;     // Minimum rotational position
 
     // Define class members
-    CRServo   servo;
-    double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+    Servo   servo1;
+    Servo   servo2;
+    double  position = MAX_POS - MIN_POS;
     boolean rampUp = true;
 
-    double targetPosition = 0;
-    int adjustmentIncrement = 3;
+    double targetPosition1 = 0;
+    double targetPosition2 = 0;
+    double adjustmentIncrement = 0.01;
 
     boolean buttonCheck = false;
     boolean buttonCheck2 = false;
@@ -74,7 +74,8 @@ public class ConceptScanServo extends LinearOpMode {
 
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        servo = hardwareMap.get(CRServo.class,"servo");
+        servo1 = hardwareMap.get(Servo.class, "servo");
+        servo2 = hardwareMap.get(Servo.class, "servo2");
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo.");
@@ -84,102 +85,57 @@ public class ConceptScanServo extends LinearOpMode {
 
         // Scan servo till stop pressed.
         while (opModeIsActive()) {
-/*
-            // slew the servo, according to the rampUp (direction) variable.
-            if (rampUp) {
-                // Keep stepping up until we hit the max value.
-                position += INCREMENT ;
-                if (position >= MAX_POS ) {
-                    position = MAX_POS;
-                    rampUp = !rampUp;   // Switch ramp direction
-                }
-            }
-            else {
-                // Keep stepping down until we hit the min value.
-                position -= INCREMENT ;
-                if (position <= MIN_POS ) {
-                    position = MIN_POS;
-                    rampUp = !rampUp;  // Switch ramp direction
-                }
 
- */
+            adjustmentIncrement = 0.01 + (gamepad1.right_trigger / 10);
 
-            /*
-            if(gamepad1.a && !buttonCheck)
+            if(gamepad1.a)
             {
-                if(!buttonCheck)
-                {
-                    targetPosition = targetPosition + adjustmentIncrement;
-                }
-                else
-                {
-                    targetPosition = targetPosition - adjustmentIncrement;
-                }
-                buttonCheck = true;
+                targetPosition1 += adjustmentIncrement;
             }
-            else if(!gamepad1.a)
+            else if (gamepad1.b)
             {
-                buttonCheck = false;
+                targetPosition1 -= adjustmentIncrement;
             }
 
-            if(gamepad1.b && !buttonCheck2)
+            if(gamepad1.dpad_left)
             {
-                if(!buttonCheck2)
-                {
-                    targetPosition = targetPosition - adjustmentIncrement;
-                }
-                else
-                {
-                    targetPosition = targetPosition + adjustmentIncrement;
-                }
-                buttonCheck2 = true;
+                targetPosition2 += adjustmentIncrement;
             }
-            else if(!gamepad1.b)
+            else if (gamepad1.dpad_down)
             {
-                buttonCheck2 = false;
+                targetPosition2 -= adjustmentIncrement;
             }
 
+            servo1.setPosition(targetPosition1 / 100);
+            servo2.setPosition(targetPosition2 / 100);
 
+            adjustmentIncrement = 0.01 + (gamepad1.right_trigger / 10);
 
-             */
-
-            if(gamepad1.left_bumper)
-            {
-                servo.setPower(1);
-            }
-            else if (gamepad1.right_bumper)
-            {
-                servo.setPower(-1);
-            }
-            else
-            {
-                servo.setPower(0);
-            }
-
-            //servo.setPosition(targetPosition / 100);
-
-//----------------------TELEMETRY-------------------------------------------------------------------
+//----------------------TELEMETRY-------------------------------------------------------------------//
+            // Display the current value
+            telemetry.addData("Servo 1 Position", "%5.2f", targetPosition1/100);
+            telemetry.addData("Servo 2 Position", "%5.2f", targetPosition2/100);
+            telemetry.addData(">", "Press Stop to end test." );
             telemetry.addData(">", "Press X to increase the target position, Y to decrease it");
-            telemetry.addData("Servo Target Position", targetPosition / 100);
             telemetry.addData("Adjust Increment Positive?", buttonCheck);
             telemetry.update();
         }
 
+////
 
-            // Display the current value
-            telemetry.addData("Servo Position", "%5.2f", position);
-            telemetry.addData(">", "Press Stop to end test." );
-            telemetry.update();
 
-            // Set the servo to the new position and pause;
-            //servo.setPosition(position);
-            sleep(CYCLE_MS);
-            idle();
-        }
-
-        // Signal done;
-        //telemetry.addData(">", "Done");
-        //telemetry.update();
+        // Set the servo to the new position and pause;
+        //servo.setPosition(position);
+        sleep(CYCLE_MS);
+        idle();
     }
+
+    // Signal done;
+    //telemetry.addData(">", "Done");
+    //telemetry.update();
+}
+
+//Row 1 = 0.42, 0.8
+//Row 2 = 0.41, 0.71
 
 

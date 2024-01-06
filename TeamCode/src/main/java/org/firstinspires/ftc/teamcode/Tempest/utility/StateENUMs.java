@@ -1,11 +1,14 @@
-package org.firstinspires.ftc.teamcode.Meet3.utility;
+package org.firstinspires.ftc.teamcode.Tempest.utility;
 
 public class StateENUMs {
     public enum robotMode
     {
         drivingPosition,
         boardPosition,
-        placementPosition,
+        placementPositionRow1,
+        placementPositionRow2,
+        placementPositionRow4,
+
         //hangPosition,
         //hangingPosition,
 

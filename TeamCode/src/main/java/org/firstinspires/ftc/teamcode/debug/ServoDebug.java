@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.debug;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -47,8 +47,8 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Concept: Scan Servo2", group = "Concept")
-public class ConceptScanServo2 extends LinearOpMode {
+@TeleOp(name = "Servo Debug", group = "Debug")
+public class ServoDebug extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
@@ -61,7 +61,7 @@ public class ConceptScanServo2 extends LinearOpMode {
     boolean rampUp = true;
 
     double targetPosition = 0.5;
-    int adjustmentIncrement = 3;
+    double adjustmentIncrement = 0.01;
 
     boolean buttonCheck = false;
     boolean buttonCheck2 = false;
@@ -101,6 +101,7 @@ public class ConceptScanServo2 extends LinearOpMode {
                 }
 
  */
+            /*
             if(gamepad1.a && !buttonCheck)
             {
                 if(!buttonCheck)
@@ -135,13 +136,27 @@ public class ConceptScanServo2 extends LinearOpMode {
                 buttonCheck2 = false;
             }
 
+             */
+
+            adjustmentIncrement = 0.01 + (gamepad1.right_trigger / 10);
+
+            if(gamepad1.a)
+            {
+                targetPosition = targetPosition + adjustmentIncrement;
+            }
+            else if (gamepad1.b)
+            {
+                targetPosition = targetPosition - adjustmentIncrement;
+            }
+
+
 
 
 
 
             servo.setPosition(targetPosition / 100);
 
-//----------------------TELEMETRY-------------------------------------------------------------------
+//----------------------TELEMETRY-------------------------------------------------------------------//
             telemetry.addData(">", "Press X to increase the target position, Y to decrease it");
             telemetry.addData("Servo Target Position", targetPosition / 100);
             telemetry.addData("Adjust Increment Positive?", buttonCheck);
@@ -149,20 +164,20 @@ public class ConceptScanServo2 extends LinearOpMode {
         }
 
 
-            // Display the current value
-            telemetry.addData("Servo Position", "%5.2f", position);
-            telemetry.addData(">", "Press Stop to end test." );
-            telemetry.update();
+        // Display the current value
+        telemetry.addData("Servo Position", "%5.2f", position);
+        telemetry.addData(">", "Press Stop to end test." );
+        telemetry.update();
 
-            // Set the servo to the new position and pause;
-            //servo.setPosition(position);
-            sleep(CYCLE_MS);
-            idle();
-        }
-
-        // Signal done;
-        //telemetry.addData(">", "Done");
-        //telemetry.update();
+        // Set the servo to the new position and pause;
+        //servo.setPosition(position);
+        sleep(CYCLE_MS);
+        idle();
     }
+
+    // Signal done;
+    //telemetry.addData(">", "Done");
+    //telemetry.update();
+}
 
 
