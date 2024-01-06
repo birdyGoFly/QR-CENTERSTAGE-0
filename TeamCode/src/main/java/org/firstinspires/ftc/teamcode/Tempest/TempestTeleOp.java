@@ -87,7 +87,7 @@ public class TempestTeleOp extends OpMode
     private double doorOpenPosition = 0.2;/*measure the value*/
     private double doorClosedPosition = 0.42;/*change this*//*assuming that this is the starting position*/
     private double transferArmPower = 1;
-    private double transferRotationDepositPosition = 0.435;/*measure the value*/
+    private double transferRotationDepositPosition = 0.405;/*measure the value*/
     private double transferRotationRestPosition = 0;/*change this to 0.965 if you want it to be angled *//*assuming that this is the starting position*/
     private double transferRotationIntakePosition = 0;/*change this*//*assuming that this is the intake position*/
     private double transferRotationTarget = 0;
@@ -443,43 +443,31 @@ public class TempestTeleOp extends OpMode
 
 
                     //PRESSING DPAD LEFT GOES TO ADJUSTABLE MODE
-                    if (gamepad1.dpad_left && !isLeftdpadPressed) { //if nothing else was pressed, check if b was pressed to switch modes
-                        isLeftdpadPressed = true;
+                    if (gamepad1.dpad_left) { //if nothing else was pressed, check if b was pressed to switch modes
                         armToBoardPosition = true; //puts the sliders, arm, and transferRotation to the right position
                         activeRobotMode = boardPosition; //switches mode
                         numAPress = 0; //resets how many times A has been pressed just in case
-                    } else if(!gamepad1.dpad_left) { //makes sure B cannot be held
-                        isLeftdpadPressed = false;
                     }
 
                     //PRESSING RIGHT BUMPER TO 1ST ROW
-                    if (gamepad1.right_bumper && !isRightBumperPressed) { //if nothing else was pressed, check if b was pressed to switch modes
-                        isRightBumperPressed = true;
+                    if (gamepad1.right_bumper) { //if nothing else was pressed, check if b was pressed to switch modes
                         armToRow1 = true; //puts the sliders, arm, and transferRotation to the right position
                         activeRobotMode = placementPositionRow1; //switches mode
                         numAPress = 0; //resets how many times A has been pressed just in case
-                    } else if(!gamepad1.right_bumper) { //makes sure B cannot be held
-                        isRightBumperPressed = false;
                     }
 
                     //PRESSING DPAD DOWN GOES TO 2ND ROW
-                    if (gamepad1.dpad_down && !isDowndpadPressed) { //if nothing else was pressed, check if b was pressed to switch modes
-                        isDowndpadPressed = true;
+                    if (gamepad1.dpad_down) { //if nothing else was pressed, check if b was pressed to switch modes
                         armToRow2 = true; //puts the sliders, arm, and transferRotation to the right position
                         activeRobotMode = placementPositionRow2; //switches mode
                         numAPress = 0; //resets how many times A has been pressed just in case
-                    } else if(!gamepad1.dpad_down) { //makes sure B cannot be held
-                        isDowndpadPressed = false;
                     }
 
                     //PRESSING DPAD DOWN GOES TO 4TH ROW
-                    if (gamepad1.dpad_right && !isRightdpadPressed) { //if nothing else was pressed, check if b was pressed to switch modes
-                        isRightdpadPressed = true;
+                    if (gamepad1.dpad_right) { //if nothing else was pressed, check if b was pressed to switch modes
                         armToRow4 = true; //puts the sliders, arm, and transferRotation to the right position
                         activeRobotMode = placementPositionRow4; //switches mode
                         numAPress = 0; //resets how many times A has been pressed just in case
-                    } else if(!gamepad1.dpad_right) { //makes sure B cannot be held
-                        isRightdpadPressed = false;
                     }
                 }
                 break;
@@ -509,18 +497,16 @@ public class TempestTeleOp extends OpMode
                 }
 
                 else { //if nothing was pressed then checks if B was pressed
-                    if (gamepad1.dpad_left && !isLeftdpadPressed) {
+                    if (gamepad1.left_bumper) {
                         transferWheel.setPower(0);
                         transferDoor.setPosition(doorClosedPosition);
                         // makes sure the transfer wheel stops
                         // turning when switching into driving mode
-                        isLeftdpadPressed = true;
                         armToBoardPosition = false;
-                        //Puts the sliders, arm, and transferRotation to the right position
+                        //Puts the sliders, arm, and transferRotation to the retracted driving position
                         activeRobotMode = drivingPosition; //switches mode
                         numAPress = 0; //resets how many times A has been pressed
-                    } else if(!gamepad1.dpad_left){ //makes sure B cannot be held
-                        isLeftdpadPressed = false;
+                        motorDirection *= -1;
                     }
 /*
                     if(gamepad1.right_bumper)
@@ -556,18 +542,16 @@ public class TempestTeleOp extends OpMode
                     transferDoor.setPosition(doorOpenPosition);
                     transferWheel.setPower(transferWheelTurnPower);
                 }else { //if nothing was pressed then checks if B was pressed
-                    if (gamepad1.right_bumper && !isRightBumperPressed) {
+                    if (gamepad1.left_bumper) {
                         transferWheel.setPower(0);
                         transferDoor.setPosition(doorClosedPosition);
                         // makes sure the transfer wheel stops
                         // turning when switching into driving mode
-                        isRightBumperPressed = true;
                         armToRow1 = false;
-                        //Puts the sliders, arm, and transferRotation to the right position
+                        //Puts the sliders, arm, and transferRotation to the retracted driving position
                         activeRobotMode = drivingPosition; //switches mode
                         numAPress = 0; //resets how many times A has been pressed
-                    } else if(!gamepad1.right_bumper){ //makes sure B cannot be held
-                        isRightBumperPressed = false;
+                        motorDirection *= -1;
                     }
                 }
                 break;
@@ -594,18 +578,16 @@ public class TempestTeleOp extends OpMode
                     transferDoor.setPosition(doorOpenPosition);
                     transferWheel.setPower(transferWheelTurnPower);
                 }else { //if nothing was pressed then checks if B was pressed
-                    if (gamepad1.dpad_down && !isDowndpadPressed) {
+                    if (gamepad1.left_bumper) {
                         transferWheel.setPower(0);
                         transferDoor.setPosition(doorClosedPosition);
                         // makes sure the transfer wheel stops
                         // turning when switching into driving mode
-                        isDowndpadPressed = true;
                         armToRow2 = false;
-                        //Puts the sliders, arm, and transferRotation to the right position
+                        //Puts the sliders, arm, and transferRotation to the retracted driving position
                         activeRobotMode = drivingPosition; //switches mode
                         numAPress = 0; //resets how many times A has been pressed
-                    } else if(!gamepad1.dpad_down){ //makes sure B cannot be held
-                        isDowndpadPressed = false;
+                        motorDirection *= -1;
                     }
                 }
                 break;
@@ -632,18 +614,16 @@ public class TempestTeleOp extends OpMode
                     transferDoor.setPosition(doorOpenPosition);
                     transferWheel.setPower(transferWheelTurnPower);
                 }else { //if nothing was pressed then checks if B was pressed
-                    if (gamepad1.dpad_right && !isRightdpadPressed) {
+                    if (gamepad1.left_bumper) {
                         transferWheel.setPower(0);
                         transferDoor.setPosition(doorClosedPosition);
                         // makes sure the transfer wheel stops
                         // turning when switching into driving mode
-                        isRightdpadPressed = true;
                         armToRow4 = false;
-                        //Puts the sliders, arm, and transferRotation to the right position
+                        //Puts the sliders, arm, and transferRotation to the retracted driving position
                         activeRobotMode = drivingPosition; //switches mode
                         numAPress = 0; //resets how many times A has been pressed
-                    } else if(!gamepad1.dpad_right){ //makes sure B cannot be held
-                        isRightdpadPressed = false;
+                        motorDirection *= -1;
                     }
                 }
                 break;
@@ -830,6 +810,12 @@ public class TempestTeleOp extends OpMode
             telemetry.addData("Pixel 2 Color", "NONE");
         }
     }
+
+
+
+
+
+
 /*
     void intakePercentageTarget(double targetPercentage)
     {
