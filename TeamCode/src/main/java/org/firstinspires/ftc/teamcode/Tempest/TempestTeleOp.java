@@ -7,6 +7,11 @@ import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMod
 import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.placementPositionRow2;
 import static org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs.robotMode.placementPositionRow4;
 
+import org.firstinspires.ftc.teamcode.Tempest.utility.IntakePosition;
+import static org.firstinspires.ftc.teamcode.Tempest.utility.IntakePosition.intakePositions.floorPosition;
+import static org.firstinspires.ftc.teamcode.Tempest.utility.IntakePosition.intakePositions.stackPosition;
+import static org.firstinspires.ftc.teamcode.Tempest.utility.IntakePosition.intakePositions.stowedPosition;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -22,7 +27,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Tempest.utility.StateENUMs;
 import org.firstinspires.ftc.teamcode.utildata.PixelColor;
-//import org.firstinspires.ftc.teamcode.Tempest.utility.IntakeController;
 
 
 @TeleOp(name="Tempest TeleOp", group="Iterative OpMode")
@@ -117,6 +121,7 @@ public class TempestTeleOp extends OpMode
     private boolean isAPressed = false;
     private boolean BHasBeenPressed = false;
     private StateENUMs.robotMode activeRobotMode = drivingPosition;
+    private IntakePosition.intakePositions intakeMode = stowedPosition;
     private boolean isLeftdpadPressed = false;
     private boolean isUpdpadPressed = false;
     private boolean isRightdpadPressed = false;
@@ -364,6 +369,23 @@ public class TempestTeleOp extends OpMode
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
+        switch (intakeMode)
+        {
+            case floorPosition:
+                intakeTargetPercentage = 100;
+            break;
+
+            case stackPosition:
+                intakeTargetPercentage = 50;
+            break;
+
+            case stowedPosition:
+                intakeTargetPercentage = 0;
+            break;
+        }
+
+
+
 
         switch (activeRobotMode) {
             case drivingPosition:
