@@ -300,9 +300,9 @@ public class TempestTeleOp extends OpMode
 */
         //intakePercentageTarget(intakeTargetPercentage);
 
-        rightFlipoutIntakeServo.setPosition(((0.87-0.605)*(intakeTargetPercentage/100))+0.605);
-        leftFlipoutIntakeServo.setPosition(((0.15-0.435)*(intakeTargetPercentage/100))+0.435);
-        telemetry.addData("target", ((0.15-0.435)*(intakeTargetPercentage/100))+0.435);
+        rightFlipoutIntakeServo.setPosition(((leftIntakeMAX-leftIntakeMIN)*(intakeTargetPercentage/100))+leftIntakeMIN);
+        leftFlipoutIntakeServo.setPosition(((rightIntakeMAX-rightIntakeMIN)*(intakeTargetPercentage/100))+rightIntakeMIN);
+        telemetry.addData("target", ((rightIntakeMAX-rightIntakeMIN)*(intakeTargetPercentage/100))+rightIntakeMIN);
 
 
         // convert the RGB values to HSV values.
@@ -369,18 +369,34 @@ public class TempestTeleOp extends OpMode
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
+
+        if (gamepad1.b && !BHasBeenPressed)
+        {
+            BHasBeenPressed = true;
+            intakeMode = stackPosition;
+        }
+
+        if (!gamepad1.b && BHasBeenPressed)
+        {
+            BHasBeenPressed = false;
+            intakeMode = floorPosition;
+        }
+
         switch (intakeMode)
         {
             case floorPosition:
-                intakeTargetPercentage = 100;
+                leftIntakeMIN = 0.605;
+                rightIntakeMIN = 0.435;
             break;
 
             case stackPosition:
-                intakeTargetPercentage = 50;
+                leftIntakeMIN = 0.7375;
+                rightIntakeMIN = 0.2925;
             break;
 
             case stowedPosition:
-                intakeTargetPercentage = 0;
+                leftIntakeMIN = 0.605;
+                rightIntakeMIN = 0.435;
             break;
         }
 
@@ -458,10 +474,10 @@ public class TempestTeleOp extends OpMode
                     else
                     {
                         intakeMotor.setPower(0); //Stop turning the intake motor
+                        transferWheel.setPower(0); //Keeps the transfer wheel from turning when nothing is pressed
                     }
 
                     intakeTargetPercentage = 0; //store the intakes
-                    transferWheel.setPower(0); //Keeps the transfer wheel from turning when nothing is pressed
 
 
                     //PRESSING DPAD LEFT GOES TO ADJUSTABLE MODE

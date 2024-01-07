@@ -14,6 +14,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
+import com.acmerobotics.dashboard.FtcDashboard;
 @Autonomous
 public class EasyOpenCVAutonomous extends OpMode {
     int xCameraLength = 1280;
@@ -21,6 +22,9 @@ public class EasyOpenCVAutonomous extends OpMode {
     OpenCvWebcam webcam1 = null;
     @Override
     public void init(){
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = dashboard.getTelemetry();
+
         WebcamName myWebcam = hardwareMap.get(WebcamName.class, "webcam1");
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId","id",hardwareMap.appContext.getPackageName());
         webcam1 = OpenCvCameraFactory.getInstance().createWebcam(myWebcam, cameraMonitorViewId);
